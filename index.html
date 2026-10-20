@@ -29,12 +29,15 @@
   --card-face: #f3ead8;
   --card-ink: #2b2236;
   --line: rgba(236, 228, 212, .12);
+  --amb: #e3c06a;
+  --yes: #9fcf9a;
   --font-th-display: "Chonburi", "IBM Plex Sans Thai", serif;
   --font-en: "Cormorant SC", "Cormorant Garamond", Georgia, serif;
   --font-body: "IBM Plex Sans Thai", "Sukhumvit Set", "Thonburi", system-ui, sans-serif;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { background: var(--bg); color: var(--ink); }
 body {
   font-family: var(--font-body);
@@ -164,13 +167,49 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
 .hist time { color: var(--muted); font-size: .75rem; font-variant-numeric: tabular-nums; }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--gold); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-weight: 600; font-size: .9rem; z-index: 20; }
 
+.seg .auto { align-self: center; font-size: .8rem; color: var(--muted); }
+.qline { font-family: var(--font-body); font-size: .95rem; color: var(--ink); }
+.muted { color: var(--muted); }
+.btn.small { font-size: .85rem; padding: 6px 12px; border-radius: 8px; }
+.entry .ctx { font-size: .9rem; color: var(--muted); }
+.entry .ctx b { color: var(--ink); font-weight: 600; }
+.entry .amb-note { color: var(--amb); }
+.tag.amb { color: var(--amb); }
+.plus { color: var(--amb); font-weight: 600; }
+.clar { list-style: none; margin: 6px 0 0; padding: 0 0 0 12px; border-left: 2px solid var(--gold-soft); display: grid; gap: 8px; }
+.clar li { display: grid; gap: 2px; }
+.clar .cn.sm { font-size: 1rem; }
+.clar .kw.r { color: var(--rev); }
+.verdict { display: grid; gap: 2px; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--felt-edge); background: var(--felt); }
+.verdict .vl { font-size: .78rem; color: var(--muted); letter-spacing: .03em; }
+.verdict strong { font-family: var(--font-th-display); font-weight: 400; font-size: 1.35rem; line-height: 1.3; }
+.verdict.yes strong { color: var(--yes); }
+.verdict.no strong { color: var(--rev); }
+.verdict.amb strong { color: var(--amb); }
+.verdict .why { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.clarity { border: 1px dashed var(--amb); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
+.clarity.ok { border-color: var(--felt-edge); }
+.clarity p { margin: 0; }
+.advice { display: grid; gap: 6px; }
+.advice ul, .ai-out ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.ai { display: grid; gap: 12px; border-top: 1px solid var(--line); padding-top: 16px; }
+.ai h2 { font-family: var(--font-th-display); font-weight: 400; color: var(--gold); font-size: 1.2rem; margin: 0; }
+.ai-out { display: grid; gap: 10px; max-width: 65ch; }
+.ai-out:empty { display: none; }
+.ai-out h3 { font-family: var(--font-th-display); font-weight: 400; color: var(--gold); font-size: 1.05rem; margin: 8px 0 0; }
+.ai-out h4 { font-size: .95rem; margin: 4px 0 0; color: var(--ink); }
+.ai-out p { margin: 0; }
+.thinking { color: var(--muted); margin: 0; animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .45; } }
+.err { color: var(--rev); margin: 0; }
+
 @media (max-width: 420px) {
   .spread.s10 { column-gap: 6px; }
   .pos { font-size: .66rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .card, .slot { transition: none; }
-  .deal, .shuffling .stack i { animation: none !important; }
+  .deal, .shuffling .stack i, .thinking { animation: none !important; }
 }
 </style>
 </head>
@@ -190,6 +229,15 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
       <button type="button" data-n="3" aria-pressed="true">3 ใบ · อดีต ปัจจุบัน อนาคต</button>
       <button type="button" data-n="10">10 ใบ · Celtic Cross</button>
     </div>
+    <div class="seg" role="group" aria-label="หมวดคำถาม" id="topicSel">
+      <button type="button" data-t="auto">อัตโนมัติ</button>
+      <button type="button" data-t="love">ความรัก</button>
+      <button type="button" data-t="career">การงาน/การเรียน</button>
+      <button type="button" data-t="money">การเงิน</button>
+      <button type="button" data-t="health">สุขภาพ</button>
+      <button type="button" data-t="general">ทั่วไป</button>
+      <span class="auto" id="topicAuto"></span>
+    </div>
     <div class="row">
       <label class="toggle" for="revOn"><input type="checkbox" id="revOn" checked> ใช้ไพ่กลับหัว (reversed)</label>
       <div class="actions">
@@ -205,7 +253,9 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
     <div class="spread s3" id="spread"></div>
   </section>
 
-  <section class="reading" id="reading" aria-live="polite"></section>
+  <section class="reading" id="reading"></section>
+
+  <section class="ai" id="ai" aria-live="polite" hidden></section>
 
   <details class="hist" id="histBox">
     <summary>ประวัติการเปิดไพ่ (เก็บในเครื่องนี้เท่านั้น)</summary>
@@ -328,7 +378,7 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
   MAJORS.forEach((m, i) => DECK.push({ arcana: "major", num: ROMAN[i], en: m[0], th: m[1], up: [m[2], m[3]], rv: [m[4], m[5]] }));
   for (const [key, s] of Object.entries(SUITS)) {
     s.cards.forEach((c, r) => DECK.push({
-      arcana: "minor", suit: key, num: RANKS_SHORT[r],
+      arcana: "minor", suit: key, rank: r, num: RANKS_SHORT[r],
       en: `${RANKS_EN[r]} of ${s.en}`, th: `${RANKS_TH[r]}${s.th}`,
       up: [c[0], c[1]], rv: [c[2], c[3]]
     }));
@@ -350,6 +400,45 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
       { n: "ผลลัพธ์", d: "บทสรุปที่มีแนวโน้มเกิดขึ้น" }
     ]
   };
+  const SPREAD_NAME = { 1: "ไพ่ 1 ใบ", 3: "ไพ่ 3 ใบ อดีต–ปัจจุบัน–อนาคต", 10: "Celtic Cross 10 ใบ" };
+  const KEY_POS = { 1: 0, 3: 2, 10: 9 };          // ตำแหน่งที่เป็น "คำตอบ"
+  const WEIGHT = { 10: [1, .6, .8, .8, .8, 1.2, 1, .8, .5, 1.6] };
+  const STORY = { 3: [0, 1, 2], 10: [3, 0, 5] };   // อดีต → ปัจจุบัน → อนาคต
+  const PAIRS = { 3: [[0, 1], [1, 2]], 10: [[0, 1], [2, 4], [3, 5], [6, 9]] };
+  const MAX_CLAR = 3;
+
+  // ค่าพลังบวก/ลบของไพ่ (ตั้งตรง) ใช้ประเมินแนวโน้มคำตอบ
+  const VAL_MAJOR = [1, 1, .5, 1, 1, .5, 1, 1, 1, 0, 1, .5, 0, -.5, 1, -1, -2, 2, -1, 2, 1, 2];
+  const VAL_MINOR = {
+    wands: [1, .5, 1, 1.5, -1, 1.5, .5, 1, 0, -1, 1, .5, 1, 1],
+    cups: [1.5, 1.5, 1.5, -.5, -1.5, .5, -.5, -.5, 2, 2, 1, 1, 1, 1],
+    swords: [1, -.5, -2, 0, -1, 0, -1, -1.5, -1.5, -2, 0, 0, .5, .5],
+    pentacles: [1.5, .5, 1, .5, -1.5, 1, .5, 1, 1.5, 2, 1, .5, 1, 1.5]
+  };
+  DECK.forEach((c, i) => { c.id = i; c.val = c.arcana === "major" ? VAL_MAJOR[i] : VAL_MINOR[c.suit][c.rank]; });
+  const AMBIG = new Set(["The High Priestess", "Wheel of Fortune", "The Hanged Man", "The Moon", "Two of Swords", "Seven of Cups", "Four of Cups", "Two of Pentacles"]
+    .map((n) => DECK.findIndex((c) => c.en === n)));
+
+  const ELEMENT = { wands: "ไฟ", cups: "น้ำ", swords: "ลม", pentacles: "ดิน" };
+  const NUM_MEAN = ["จุดเริ่มต้นหรือเมล็ดพันธุ์ของเรื่อง", "การเลือก ความสัมพันธ์ หรือสองทาง", "การเติบโตและผลแรกที่เริ่มเห็น", "ความมั่นคง หรือการหยุดนิ่ง", "ความขัดแย้งและการเปลี่ยนแปลง", "การปรับสมดุลและการให้–รับ", "บททดสอบและการประเมิน", "การเคลื่อนไหวและการลงแรง", "ใกล้ถึงจุดหมาย", "จบวงจรหนึ่ง เตรียมเริ่มใหม่"];
+  const COURT = ["อาจหมายถึงเด็ก คนอายุน้อย มือใหม่ หรือข่าวสาร", "อาจหมายถึงคนหนุ่มสาวที่กระตือรือร้น หรือเรื่องที่เคลื่อนไหวเร็ว", "อาจหมายถึงผู้หญิงหรือผู้ใหญ่ที่มีอิทธิพล หรือด้านที่ต้องใช้ความเข้าใจ", "อาจหมายถึงผู้ชายหรือผู้มีอำนาจ เช่น หัวหน้า หรือด้านที่ต้องใช้ภาวะผู้นำ"];
+  const REPEAT_NUM = ["หลายเรื่องกำลังเริ่มพร้อมกัน", "มีทางเลือกหรือคู่ความสัมพันธ์เป็นแกน", "เรื่องกำลังขยายตัว", "ต้องการความมั่นคง แต่ระวังการย่ำอยู่กับที่", "มีความขัดแย้งหลายด้านพร้อมกัน", "เป็นช่วงปรับสมดุล", "ถูกทดสอบหลายเรื่อง", "เรื่องเคลื่อนเร็ว", "ใกล้บทสรุป", "หลายเรื่องกำลังจบวงจร"];
+
+  const TOPICS = {
+    auto: { th: "อัตโนมัติ" },
+    love: { th: "ความรัก", re: /รัก|แฟน|คู่ครอง|คู่รัก|ความสัมพันธ์|แต่งงาน|คนคุย|เนื้อคู่|หึง|เลิกกัน|คืนดี|จีบ|โสด|สามี|ภรรยา|ชอบเขา|ชอบเรา/,
+      lens: { major: "เป็นเรื่องที่มีผลต่อชีวิตรักระยะยาว ไม่ใช่อารมณ์ชั่วคราว", wands: "แรงดึงดูด ความหลงใหล และความกระตือรือร้นในความสัมพันธ์", cups: "ความรู้สึกโดยตรงและความผูกพันใจต่อใจ ชุดนี้คือแก่นของเรื่องรัก", swords: "การสื่อสาร ความคิด การทะเลาะ หรือการตัดสินใจเรื่องความสัมพันธ์ด้วยเหตุผล", pentacles: "ความจริงจัง ความมั่นคง การวางอนาคตร่วมกัน และเรื่องเงินในความสัมพันธ์" } },
+    career: { th: "การงาน/การเรียน", re: /งาน|อาชีพ|เลื่อนขั้น|ตำแหน่ง|สมัคร|สัมภาษณ์|เจ้านาย|หัวหน้า|บริษัท|ธุรกิจ|โปรเจ|ลาออก|ขึ้นเรือ|ลงเรือ|เรียน|สอบ|ทุน|ย้ายงาน|ลูกค้า/,
+      lens: { major: "เป็นจุดเปลี่ยนทางอาชีพหรือเส้นทางชีวิต ไม่ใช่เรื่องประจำวัน", wands: "แรงผลักดัน โปรเจกต์ใหม่ ความทะเยอทะยาน ชุดนี้คือแกนของเรื่องงาน", cups: "ความพอใจในงาน บรรยากาศในทีม และความสัมพันธ์กับเพื่อนร่วมงาน", swords: "การตัดสินใจ การเจรจา การแข่งขัน ความเครียด หรือปัญหาการสื่อสารในงาน", pentacles: "รายได้ ผลตอบแทน ทักษะ และความมั่นคงของตำแหน่ง" } },
+    money: { th: "การเงิน", re: /เงิน|ลงทุน|หุ้น|หนี้|กู้|ขายของ|ซื้อบ้าน|ซื้อรถ|รายได้|โชคลาภ|หวย|ทรัพย์|คริปโต|กำไร|ขาดทุน|ค้าขาย/,
+      lens: { major: "เป็นการเปลี่ยนแปลงทางการเงินระดับใหญ่", wands: "การลงทุนเชิงรุกและโอกาสใหม่ แต่มีความเสี่ยงจากความใจร้อน", cups: "การใช้เงินตามอารมณ์ หรือเงินที่เกี่ยวกับครอบครัวและคนใกล้ชิด", swords: "การตัดสินใจทางการเงิน สัญญา หนี้ หรือความกังวลเรื่องเงิน", pentacles: "ตัวเงินโดยตรง ทั้งรายรับ รายจ่าย และทรัพย์สิน ชุดนี้คือแกนของเรื่องเงิน" } },
+    health: { th: "สุขภาพ", re: /สุขภาพ|ป่วย|โรค|ผ่าตัด|รักษา|หมอ|ร่างกาย|นอนไม่หลับ|เครียด|ลดน้ำหนัก|ตั้งครรภ์|ท้อง/,
+      lens: { major: "เป็นเรื่องสุขภาพที่ควรให้ความสำคัญจริงจัง", wands: "พลังงาน ความกระปรี้กระเปร่า การออกกำลังกาย หรือการอักเสบในร่างกาย", cups: "อารมณ์ จิตใจ การนอน และสมดุลของเหลวในร่างกาย", swords: "ความเครียด ความคิดมาก หรือการผ่าตัดและหัตถการ", pentacles: "ร่างกายโดยตรง อาหาร กิจวัตร และการฟื้นตัวแบบค่อยเป็นค่อยไป" } },
+    general: { th: "ทั่วไป", re: /$^/,
+      lens: { major: "เป็นบทเรียนหรือจุดเปลี่ยนสำคัญของชีวิต", wands: "การลงมือทำและแรงบันดาลใจ", cups: "ความรู้สึกและความสัมพันธ์", swords: "ความคิด การตัดสินใจ และความขัดแย้ง", pentacles: "เงิน งาน และสิ่งที่จับต้องได้" } }
+  };
+  const detectTopic = (q) => ["love", "career", "money", "health"].find((k) => TOPICS[k].re.test(q)) || "general";
+  const isYesNo = (q) => /ไหม|มั้ย|หรือไม่|หรือเปล่า|รึเปล่า|ป่าว|ควร|ได้หรือ|จะได้/.test(q);
 
   const $ = (s) => document.querySelector(s);
   const store = {
@@ -357,6 +446,7 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
   };
   const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const kw2 = (c, rev) => (rev ? c.rv : c.up)[0].split(" ").slice(0, 2).join(" ");
 
   // สุ่มแบบไม่ลำเอียง (rejection sampling) ด้วย CSPRNG
   function randInt(n) {
@@ -373,11 +463,18 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
 
   let spreadN = store.get("tarot.spread", 3);
   if (!SPREADS[spreadN]) spreadN = 3;
+  let topicSel = store.get("tarot.topic", "auto");
+  if (!TOPICS[topicSel]) topicSel = "auto";
   $("#revOn").checked = store.get("tarot.rev", true);
-  let state = null; // { n, q, cards: [{id, rev}], open: [bool], saved }
+  let state = null; // { t, n, q, useRev, order, next, cards: [{id, rev, clar: [{id, rev}]}], open: [bool] }
 
-  function syncSpreadButtons() {
+  const topicOf = () => topicSel === "auto" ? detectTopic(state ? state.q : $("#q").value) : topicSel;
+
+  function syncButtons() {
     document.querySelectorAll("#spreadSel button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.n === spreadN)));
+    document.querySelectorAll("#topicSel button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.t === topicSel)));
+    const t = topicOf();
+    $("#topicAuto").textContent = topicSel === "auto" ? `ตรวจพบ: ${TOPICS[t].th}` : "";
   }
 
   function faceHTML(c) {
@@ -392,10 +489,12 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
     const useRev = $("#revOn").checked;
     const pos = SPREADS[spreadN];
     state = {
-      n: spreadN, q: $("#q").value.trim(), saved: false,
-      cards: pos.map((_, i) => ({ id: order[i], rev: useRev && randInt(2) === 1 })),
+      t: Date.now(), n: spreadN, q: $("#q").value.trim(), useRev, order, next: pos.length,
+      cards: pos.map((_, i) => ({ id: order[i], rev: useRev && randInt(2) === 1, clar: [] })),
       open: pos.map(() => false)
     };
+    aiReset();
+    syncButtons();
     renderSpread(animate);
     renderReading();
   }
@@ -409,12 +508,13 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
       const cross = state.n === 10 && i === 1;
       const area = state.n === 10 ? `grid-area:p${cross ? 1 : i + 1};` : "";
       const delay = animate ? `animation-delay:${i * 70}ms;` : "";
-      const label = `ตำแหน่ง ${i + 1} ${pos[i].n}`;
+      const label = state.open[i] ? `${pos[i].n}: ${card.en}${c.rev ? " กลับหัว" : ""}` : `ตำแหน่ง ${i + 1} ${pos[i].n} แตะเพื่อเปิด`;
+      const plus = (k) => state.cards[k].clar.length ? ` <span class="plus">+${state.cards[k].clar.length}</span>` : "";
       return `<div class="cell${animate ? " deal" : ""}" style="${area}${delay}">
-        <button type="button" class="slot${c.rev ? " reversed" : ""}${cross ? " cross" : ""}" data-i="${i}" aria-label="${label} แตะเพื่อเปิด">
+        <button type="button" class="slot${c.rev ? " reversed" : ""}${cross ? " cross" : ""}${state.open[i] ? " open" : ""}" data-i="${i}" aria-label="${esc(label)}">
           <div class="card"><div class="back"></div>${faceHTML(card)}</div>
         </button>
-        ${cross ? "" : `<div class="pos"><b>${i + 1}</b> ${pos[i].n}${state.n === 10 && i === 0 ? " / <b>2</b> อุปสรรค" : ""}</div>`}
+        ${cross ? "" : `<div class="pos"><b>${i + 1}</b> ${pos[i].n}${plus(i)}${state.n === 10 && i === 0 ? ` / <b>2</b> อุปสรรค${plus(1)}` : ""}</div>`}
       </div>`;
     }).join("");
     updateHint();
@@ -437,78 +537,373 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
     renderReading();
   }
 
-  function summaryHTML() {
-    const cs = state.cards.map((c) => ({ ...DECK[c.id], rev: c.rev }));
+  function drawClarifier(i) {
+    if (!state || state.next >= DECK.length) return;
+    const c = state.cards[i];
+    if (c.clar.length >= MAX_CLAR) return;
+    c.clar.push({ id: state.order[state.next++], rev: state.useRev && randInt(2) === 1 });
+    renderSpread(false);
+    renderReading();
+    renderAI();
+    saveHistory();
+    const el = document.querySelector(`#e${i}`);
+    if (el) el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+  }
+
+  // ---------- เครื่องตีความในเครื่อง ----------
+  const score = (x) => { const v = DECK[x.id].val; return x.rev ? (v > 0 ? -v * .6 : -v * .4) : v; };
+  function posScore(c) {
+    let s = score(c), w = 1;
+    c.clar.forEach((x) => { s += .5 * score(x); w += .5; });
+    return s / w;
+  }
+  function isAmbiguous(c) {
+    if (c.clar.length >= MAX_CLAR) return false;
+    const s = posScore(c);
+    return (AMBIG.has(c.id) && c.clar.length === 0) || Math.abs(s) < .3;
+  }
+  function dignity(a, b) {
+    if (!a.suit || !b.suit) return null;
+    const ea = ELEMENT[a.suit], eb = ELEMENT[b.suit];
+    if (ea === eb) return ["เสริมกันแรง", `ธาตุ${ea}เหมือนกัน พลังทั้งดีและร้ายถูกขยาย`];
+    const k = [ea, eb].sort().join();
+    if (k === ["ไฟ", "ลม"].sort().join() || k === ["น้ำ", "ดิน"].sort().join()) return ["สนับสนุนกัน", `ธาตุ${ea}กับ${eb}ส่งเสริมกัน`];
+    if (k === ["ไฟ", "น้ำ"].sort().join() || k === ["ลม", "ดิน"].sort().join()) return ["ขัดกัน", `ธาตุ${ea}กับ${eb}ตรงข้ามกัน พลังของสองใบนี้ลดทอนกัน`];
+    return ["เป็นกลาง", `ธาตุ${ea}กับ${eb}ไม่ขัดไม่เสริมกัน`];
+  }
+
+  function verdict() {
+    const n = state.n, key = KEY_POS[n];
+    let sum = 0, wsum = 0;
+    state.cards.forEach((c, i) => {
+      let w = (WEIGHT[n] ? WEIGHT[n][i] : 1) * (i === key ? 1.5 : 1);
+      if (DECK[c.id].arcana === "major") w *= 1.3;
+      sum += w * posScore(c); wsum += w;
+    });
+    const avg = sum / wsum, ks = posScore(state.cards[key]);
+    const conflict = n > 1 && Math.sign(ks) !== Math.sign(avg) && Math.abs(ks) > .5 && Math.abs(avg) > .2;
+    let level;
+    if (conflict || (avg > -.4 && avg < .5)) level = "unclear";
+    else if (avg >= 1.1) level = "strongYes";
+    else if (avg >= .5) level = "yes";
+    else if (avg <= -1) level = "strongNo";
+    else level = "no";
+    return { avg, ks, conflict, level };
+  }
+
+  function entryHTML(i) {
+    const pos = SPREADS[state.n][i];
+    const c = state.cards[i], card = DECK[c.id];
+    const m = c.rev ? card.rv : card.up;
+    const topic = topicOf();
+    const lens = TOPICS[topic].lens[card.arcana === "major" ? "major" : card.suit];
+    const extra = card.arcana === "major" ? "ไพ่ใหญ่ (Major Arcana) น้ำหนักสูงกว่าไพ่ใบอื่นในการวาง"
+      : card.rank >= 10 ? `ไพ่บุคคล: ${COURT[card.rank - 10]}`
+      : `เลข ${card.rank + 1} ในชุด${SUITS[card.suit].th} (ธาตุ${ELEMENT[card.suit]}): ${NUM_MEAN[card.rank]}`;
+    const amb = isAmbiguous(c);
+    const clar = c.clar.map((x) => {
+      const k = DECK[x.id], mm = x.rev ? k.rv : k.up;
+      return `<li><span class="cn sm">${esc(k.en)}</span> <span class="th">${esc(k.th)}</span> <span class="tag ${x.rev ? "rv" : "up"}">${x.rev ? "กลับหัว" : "ตั้งตรง"}</span>
+        <div class="kw${x.rev ? " r" : ""}">${mm[0]}</div><p>${mm[1]}</p></li>`;
+    }).join("");
+    const clarNote = c.clar.length ? (() => {
+      const before = score(c), after = posScore(c);
+      const tone = after > .3 ? "ไปทางบวก" : after < -.3 ? "ไปทางลบ" : "ยังก้ำกึ่ง";
+      const shift = Math.sign(before) !== Math.sign(after) && Math.abs(after) > .1 ? " ไพ่ขยายพลิกน้ำหนักของใบหลัก" : Math.abs(after) < Math.abs(before) ? " ไพ่ขยายทำให้น้ำหนักเบาลง" : " ไพ่ขยายยืนยันใบหลัก";
+      return `<p class="ctx"><b>เมื่อรวมไพ่ขยาย:</b> ตำแหน่งนี้${tone}${shift}</p>`;
+    })() : "";
+    const canDraw = c.clar.length < MAX_CLAR && state.next < DECK.length;
+    return `<article class="entry${c.rev ? " rv" : ""}" id="e${i}">
+      <div class="posn">${i + 1} · ${pos.n} — ${pos.d}</div>
+      <div class="top"><span class="cn">${esc(card.en)}</span><span class="th">${esc(card.th)}</span>
+      <span class="tag ${c.rev ? "rv" : "up"}">${c.rev ? "กลับหัว" : "ตั้งตรง"}</span>
+      ${amb ? '<span class="tag amb">กำกวม</span>' : ""}</div>
+      <div class="kw">${m[0]}</div>
+      <p>${m[1]}</p>
+      <p class="ctx"><b>ในเรื่อง${TOPICS[topic].th}:</b> ${lens}${c.rev ? " (กลับหัว: ด้านนี้ติดขัด ล่าช้า หรือแสดงออกมากหรือน้อยเกินไป)" : ""}</p>
+      <p class="ctx">${extra}</p>
+      ${amb ? `<p class="ctx amb-note">${AMBIG.has(c.id) && !c.clar.length ? "ไพ่ใบนี้ตีความได้หลายทางโดยธรรมชาติ" : "น้ำหนักของตำแหน่งนี้ยังก้ำกึ่ง"} แนะนำเปิดไพ่ขยายเพื่อดูว่าเอียงไปทางไหน</p>` : ""}
+      ${clar ? `<ul class="clar">${clar}</ul>${clarNote}` : ""}
+      ${canDraw ? `<div><button type="button" class="btn small${amb ? "" : " ghost"}" data-clar="${i}">+ เปิดไพ่ขยาย (${c.clar.length}/${MAX_CLAR})</button></div>` : ""}
+    </article>`;
+  }
+
+  function synthesisHTML() {
+    const n = state.n, cs = state.cards.map((c) => ({ ...DECK[c.id], rev: c.rev, s: posScore(c) }));
+    const pos = SPREADS[n], topic = topicOf();
+    const blocks = [];
+
+    // คำตอบ
+    const v = verdict();
+    const yn = isYesNo(state.q);
+    const LV = {
+      strongYes: [yn ? "ใช่ (แนวโน้มชัด)" : "ไปในทางที่ดีชัดเจน", "yes"],
+      yes: [yn ? "เอนไปทาง ใช่" : "เอนไปทางบวก", "yes"],
+      unclear: [yn ? "ยังไม่ชัด" : "ก้ำกึ่ง", "amb"],
+      no: [yn ? "เอนไปทาง ไม่" : "เอนไปทางลบ", "no"],
+      strongNo: [yn ? "ไม่ (แนวโน้มชัด)" : "ไปในทางลบชัดเจน", "no"]
+    }[v.level];
+    const key = KEY_POS[n], kc = cs[key];
+    let why = `น้ำหนักรวมของไพ่ ${v.avg >= 0 ? "+" : ""}${v.avg.toFixed(2)} (ช่วง −2 ถึง +2)`;
+    if (n > 1) why += ` · ไพ่ตำแหน่ง "${pos[key].n}" คือ ${kc.en}${kc.rev ? " กลับหัว" : ""}`;
+    if (v.conflict) why += ` · ไพ่คำตอบขัดกับภาพรวม`;
+    blocks.push(`<div class="verdict ${LV[1]}"><span class="vl">คำตอบ${state.q ? "ต่อคำถาม" : ""}</span><strong>${LV[0]}</strong><span class="why">${why}</span></div>`);
+
+    // ความชัดเจน + ไพ่ขยาย
+    const ambPos = state.cards.map((c, i) => isAmbiguous(c) ? i : -1).filter((i) => i >= 0);
+    if (v.level === "unclear" || ambPos.length) {
+      const target = v.level === "unclear" && state.cards[key].clar.length < MAX_CLAR ? key : ambPos[0];
+      const list = ambPos.map((i) => `${i + 1} ${pos[i].n}`).join(", ");
+      blocks.push(`<div class="clarity"><p><b>คำตอบยังกำกวม</b>${list ? ` ตำแหน่งที่ก้ำกึ่ง: ${list}` : ""} ${v.conflict ? "ไพ่คำตอบชี้คนละทางกับไพ่ส่วนใหญ่" : ""}</p>
+        ${target !== undefined && state.next < DECK.length ? `<button type="button" class="btn small" data-clar="${target}">เปิดไพ่ขยายตำแหน่ง ${target + 1} ${pos[target].n}</button>` : ""}</div>`);
+    }
+
+    const lines = [];
+    // ไพ่ใหญ่ / ชุด / กลับหัว
     const majors = cs.filter((c) => c.arcana === "major").length;
     const revs = cs.filter((c) => c.rev).length;
-    const counts = {};
-    cs.forEach((c) => { if (c.suit) counts[c.suit] = (counts[c.suit] || 0) + 1; });
-    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-    const lines = [];
-    if (cs.length === 1) {
-      const c = cs[0];
-      lines.push(c.rev ? `ไพ่ออกกลับหัว: พลังของไพ่ใบนี้ถูกปิดกั้น ล่าช้า หรือแสดงออกในทางตรงข้าม ให้ดูว่าอะไรในตัวคุณหรือสถานการณ์ที่ยังติดขัด` : `ไพ่ออกตั้งตรง: พลังของไพ่ใบนี้แสดงออกได้เต็มที่`);
-    } else {
-      const ratio = majors / cs.length;
-      lines.push(ratio >= .5 ? `ไพ่ใหญ่ (Major Arcana) ${majors} จาก ${cs.length} ใบ เรื่องนี้เป็นจุดเปลี่ยนสำคัญของชีวิต มีปัจจัยใหญ่เกินกว่าที่คุณควบคุมได้คนเดียว`
-        : majors ? `ไพ่ใหญ่ ${majors} จาก ${cs.length} ใบ มีบางเรื่องที่สำคัญเกินเรื่องประจำวัน แต่ส่วนใหญ่คุณยังกำหนดได้เอง`
-        : `ไม่มีไพ่ใหญ่ เรื่องนี้เป็นเรื่องในชีวิตประจำวัน ผลขึ้นกับการกระทำของคุณเป็นหลัก`);
+    if (n > 1) {
+      lines.push(majors / n >= .5 ? `ไพ่ใหญ่ ${majors} จาก ${n} ใบ: เรื่องนี้เป็นจุดเปลี่ยนสำคัญ มีปัจจัยใหญ่เกินกว่าที่คุณควบคุมได้คนเดียว`
+        : majors ? `ไพ่ใหญ่ ${majors} จาก ${n} ใบ: มีบางส่วนที่สำคัญเกินเรื่องประจำวัน แต่ส่วนใหญ่คุณยังกำหนดได้เอง`
+        : `ไม่มีไพ่ใหญ่: เป็นเรื่องในชีวิตประจำวัน ผลขึ้นกับการกระทำของคุณเป็นหลัก`);
+      const counts = {};
+      cs.forEach((c) => { if (c.suit) counts[c.suit] = (counts[c.suit] || 0) + 1; });
+      const top = Object.entries(counts).sort((a, b) => b[1] - a[1]);
       if (top.length && top[0][1] >= 2 && (top.length === 1 || top[0][1] > top[1][1])) {
         const s = SUITS[top[0][0]];
-        lines.push(`ชุด${s.th} (${s.en}, ธาตุ${s.el}) ออกมากที่สุด เน้นเรื่อง${s.domain}`);
+        lines.push(`ชุด${s.th} (${s.en}, ธาตุ${s.el}) ออกมากที่สุด: เรื่องนี้หมุนรอบ${s.domain}${topic !== "general" && TOPICS[topic].lens[top[0][0]] ? ` ในเรื่อง${TOPICS[topic].th}หมายถึง${TOPICS[topic].lens[top[0][0]]}` : ""}`);
       }
-      lines.push(revs === 0 ? "ไม่มีไพ่กลับหัว พลังงานไหลลื่น"
-        : revs / cs.length > .5 ? `ไพ่กลับหัว ${revs} ใบ เกินครึ่ง มีความติดขัด ล่าช้า หรือสิ่งที่ต้องแก้จากข้างในก่อน`
-        : `ไพ่กลับหัว ${revs} ใบ มีบางจุดที่ติดขัดหรือต้องระวัง`);
+      const missing = Object.keys(SUITS).filter((k) => !counts[k]);
+      if (n >= 10 && missing.length) lines.push(`ไม่มีชุด${missing.map((k) => SUITS[k].th).join(" ")}: ด้าน${missing.map((k) => SUITS[k].domain.split(" ")[0]).join(" ")}ยังไม่ใช่ประเด็นหลัก หรือเป็นด้านที่ถูกมองข้าม`);
+      lines.push(revs === 0 ? "ไม่มีไพ่กลับหัว: พลังงานไหลลื่น สิ่งต่าง ๆ แสดงออกตรงไปตรงมา"
+        : revs / n > .5 ? `ไพ่กลับหัว ${revs} ใบ เกินครึ่ง: มีความติดขัด ล่าช้า หรือต้องแก้จากข้างในก่อน`
+        : `ไพ่กลับหัว ${revs} ใบ: มีบางจุดที่ติดขัดหรือต้องระวัง`);
+      // เลขซ้ำ
+      const ranks = {};
+      cs.forEach((c) => { if (c.suit && c.rank < 10) ranks[c.rank] = (ranks[c.rank] || 0) + 1; });
+      Object.entries(ranks).filter(([, k]) => k >= 2).forEach(([r, k]) => lines.push(`เลข ${+r + 1} ออก ${k} ใบ: ${REPEAT_NUM[r]}`));
+      const courts = cs.filter((c) => c.suit && c.rank >= 10);
+      if (courts.length) lines.push(`ไพ่บุคคล ${courts.length} ใบ (${courts.map((c) => c.en).join(", ")}): มีคนอื่นเข้ามามีบทบาทในเรื่องนี้ หรือเป็นบุคลิกที่คุณต้องใช้`);
+    } else {
+      lines.push(cs[0].rev ? "ไพ่ออกกลับหัว: พลังของไพ่ใบนี้ถูกปิดกั้น ล่าช้า หรือแสดงออกในทางตรงข้าม ให้ดูว่าอะไรในตัวคุณหรือสถานการณ์ที่ยังติดขัด" : "ไพ่ออกตั้งตรง: พลังของไพ่ใบนี้แสดงออกได้เต็มที่");
     }
-    return `<div class="summary"><h2>ภาพรวม</h2>${lines.map((l) => `<p>${l}</p>`).join("")}</div>`;
+
+    // เส้นเรื่อง
+    if (STORY[n]) {
+      const [a, b, c] = STORY[n].map((i) => cs[i].s);
+      const trend = c - a;
+      lines.push(`เส้นเรื่อง (${pos[STORY[n][0]].n} → ${pos[STORY[n][1]].n} → ${pos[STORY[n][2]].n}): ` +
+        (trend > .7 ? "สถานการณ์มีแนวโน้มดีขึ้นเรื่อย ๆ" : trend < -.7 ? "แนวโน้มแย่ลงถ้ายังเดินแบบเดิม ต้องปรับตั้งแต่ตอนนี้" : b < Math.min(a, c) ? "ตอนนี้คือจุดต่ำสุด ผ่านไปได้จะดีขึ้น" : b > Math.max(a, c) ? "ตอนนี้คือจุดที่ดีที่สุด ควรรักษาไว้" : "สถานการณ์ค่อนข้างทรงตัว"));
+    }
+    // ธาตุ
+    (PAIRS[n] || []).forEach(([x, y]) => {
+      const d = dignity(cs[x], cs[y]);
+      if (d && d[0] !== "เป็นกลาง") lines.push(`${pos[x].n} กับ ${pos[y].n} ${d[0]}: ${d[1]}`);
+    });
+    // Celtic Cross เฉพาะ
+    if (n === 10) {
+      const g = cs[4].s, o = cs[9].s;
+      lines.push(Math.sign(g) === Math.sign(o) ? "เป้าหมาย (5) กับผลลัพธ์ (10) ไปทางเดียวกัน: สิ่งที่หวังมีโอกาสเป็นจริง" : "เป้าหมาย (5) กับผลลัพธ์ (10) สวนทางกัน: สิ่งที่หวังอาจไม่ตรงกับสิ่งที่จะเกิด ต้องปรับความคาดหวังหรือวิธีการ");
+      lines.push(cs[8].s < 0 ? `ตำแหน่งหวังและกลัว (9) เป็นด้านลบ: ความกังวลเรื่อง${kw2(cs[8], cs[8].rev)}อาจกำลังบังการตัดสินใจ` : `ตำแหน่งหวังและกลัว (9) เป็นด้านบวก: คุณหวังเรื่อง${kw2(cs[8], cs[8].rev)} แต่อาจกลัวว่าจะไม่ได้`);
+    }
+    blocks.push(`<div class="summary"><h2>การวิเคราะห์ภาพรวม</h2>${lines.map((l) => `<p>${l}</p>`).join("")}</div>`);
+
+    // คำแนะนำ
+    const adv = [];
+    const idx = cs.map((c, i) => i);
+    const best = idx.reduce((a, b) => cs[b].s > cs[a].s ? b : a), worst = idx.reduce((a, b) => cs[b].s < cs[a].s ? b : a);
+    if (kc.s >= .3) adv.push(`ไพ่ "${pos[key].n}" สนับสนุน: เดินหน้าด้วย${kw2(kc, kc.rev)}`);
+    else adv.push(`ไพ่ "${pos[key].n}" ชี้ไปที่${kw2(kc, kc.rev)}: ถ้าไม่อยากให้ออกมาแบบนี้ ${n > 1 && worst !== key ? `ให้แก้ที่ตำแหน่ง ${worst + 1} ${pos[worst].n} (${kw2(cs[worst], cs[worst].rev)}) ก่อน` : "ให้ทบทวนวิธีการก่อนตัดสินใจ"}`);
+    if (n > 1 && best !== key && cs[best].s > .3) adv.push(`จุดแข็งที่ใช้ได้: ตำแหน่ง ${best + 1} ${pos[best].n} (${cs[best].en}) ${kw2(cs[best], cs[best].rev)}`);
+    if (n > 1 && worst !== key && cs[worst].s < -.3) adv.push(`จุดที่ต้องระวัง: ตำแหน่ง ${worst + 1} ${pos[worst].n} (${cs[worst].en}) ${kw2(cs[worst], cs[worst].rev)}`);
+    if (topic === "health") adv.push("เรื่องสุขภาพ ไพ่ใช้ทบทวนตัวเองได้ แต่ไม่ใช่การวินิจฉัย ควรปรึกษาแพทย์");
+    if (topic === "money") adv.push("การตัดสินใจทางการเงินควรอิงตัวเลขและข้อมูลจริงเป็นหลัก ใช้ไพ่ประกอบเท่านั้น");
+    blocks.push(`<div class="advice"><h2>คำแนะนำ</h2><ul>${adv.map((a) => `<li>${a}</li>`).join("")}</ul></div>`);
+    return blocks.join("");
   }
 
   function readingText() {
     const pos = SPREADS[state.n];
-    const out = [state.q ? `คำถาม: ${state.q}` : "การเปิดไพ่ทาโรต์"];
+    const out = [state.q ? `คำถาม: ${state.q}` : "การเปิดไพ่ทาโรต์", `หมวด: ${TOPICS[topicOf()].th} · ${SPREAD_NAME[state.n]}`];
     state.cards.forEach((c, i) => {
       const card = DECK[c.id];
       const m = c.rev ? card.rv : card.up;
       out.push(`${i + 1}. ${pos[i].n}: ${card.en} (${card.th})${c.rev ? " กลับหัว" : ""}\n   ${m[0]}\n   ${m[1]}`);
+      c.clar.forEach((x) => { const k = DECK[x.id]; out.push(`   + ไพ่ขยาย: ${k.en}${x.rev ? " กลับหัว" : ""} — ${(x.rev ? k.rv : k.up)[0]}`); });
     });
+    const v = verdict();
+    out.push(`แนวโน้มคำตอบ: ${{ strongYes: "บวกชัดเจน", yes: "เอนไปทางบวก", unclear: "ยังไม่ชัด", no: "เอนไปทางลบ", strongNo: "ลบชัดเจน" }[v.level]}`);
+    if (ai.text && ai.sig === sigOf()) out.push("\nการตีความเชิงลึก:\n" + stripMeta(ai.text));
     return out.join("\n");
   }
 
   function renderReading() {
     const el = $("#reading");
     if (!state) { el.innerHTML = ""; return; }
-    const pos = SPREADS[state.n];
-    const opened = state.cards.map((c, i) => ({ c, i })).filter(({ i }) => state.open[i]);
+    const opened = state.cards.map((_, i) => i).filter((i) => state.open[i]);
     if (!opened.length) {
       el.innerHTML = `<h2>คำทำนาย</h2><p class="note">คำทำนายของแต่ละตำแหน่งจะขึ้นที่นี่เมื่อคุณเปิดไพ่</p>`;
+      renderAI();
       return;
     }
     const allOpen = opened.length === state.cards.length;
-    el.innerHTML = `<h2>คำทำนาย${state.q ? ` · <span style="font-family:var(--font-body);font-size:.95rem;color:var(--ink)">${esc(state.q)}</span>` : ""}</h2>` +
-      opened.map(({ c, i }) => {
-        const card = DECK[c.id];
-        const m = c.rev ? card.rv : card.up;
-        return `<article class="entry${c.rev ? " rv" : ""}">
-          <div class="posn">${i + 1} · ${pos[i].n} — ${pos[i].d}</div>
-          <div class="top"><span class="cn">${esc(card.en)}</span><span class="th">${esc(card.th)}</span>
-          <span class="tag ${c.rev ? "rv" : "up"}">${c.rev ? "กลับหัว" : "ตั้งตรง"}</span></div>
-          <div class="kw">${m[0]}</div>
-          <p>${m[1]}</p>
-        </article>`;
-      }).join("") +
-      (allOpen ? summaryHTML() + `<div class="actions"><button type="button" class="btn ghost" id="copy">คัดลอกคำทำนาย</button></div>` : "");
-    if (allOpen) {
-      $("#copy").addEventListener("click", copyReading);
-      saveHistory();
-    }
+    el.innerHTML = `<h2>คำทำนาย${state.q ? ` · <span class="qline">${esc(state.q)}</span>` : ""}</h2>` +
+      opened.map(entryHTML).join("") +
+      (allOpen ? synthesisHTML() + `<div class="actions"><button type="button" class="btn ghost" id="copy">คัดลอกคำทำนาย</button></div>` : "");
+    if (allOpen) saveHistory();
+    renderAI();
   }
 
+  // ---------- ตีความเชิงลึกด้วย Claude (เฉพาะใน claude.ai) ----------
+  let sample = null;
+  const ai = { status: "idle", text: "", clarity: "", clarify: [], err: "", sig: "", ctl: null, off: false };
+  const sigOf = () => state ? JSON.stringify([state.q, topicOf(), state.cards.map((c) => [c.id, c.rev, c.clar.map((x) => [x.id, x.rev])])]) : "";
+  function aiReset() {
+    if (ai.ctl) ai.ctl.abort();
+    Object.assign(ai, { status: "idle", text: "", clarity: "", clarify: [], err: "", sig: "", ctl: null });
+  }
+  const stripMeta = (t) => t.replace(/\n?[ \t]*\**CLARITY:[\s\S]*$/, "").replace(/\n\s*C(L(A(R(I(T(Y)?)?)?)?)?)?$/, "").trim();
+
+  function md(t) {
+    const inline = (s) => s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    let html = "", list = false, para = [];
+    const flush = () => { if (para.length) { html += `<p>${para.join("<br>")}</p>`; para = []; } };
+    const close = () => { if (list) { html += "</ul>"; list = false; } };
+    for (const raw of esc(t).split("\n")) {
+      const l = raw.trim();
+      let m;
+      if (!l) { flush(); close(); continue; }
+      if ((m = l.match(/^(#{1,4})\s+(.*)/))) { flush(); close(); const h = m[1].length <= 2 ? 3 : 4; html += `<h${h}>${inline(m[2])}</h${h}>`; continue; }
+      if ((m = l.match(/^(?:[-*•]|\d+[.)])\s+(.*)/))) { flush(); if (!list) { html += "<ul>"; list = true; } html += `<li>${inline(m[1])}</li>`; continue; }
+      close(); para.push(inline(l));
+    }
+    flush(); close();
+    return html;
+  }
+
+  function buildPrompt() {
+    const pos = SPREADS[state.n], topic = topicOf();
+    const cardLine = (x) => {
+      const k = DECK[x.id], m = x.rev ? k.rv : k.up;
+      const kind = k.arcana === "major" ? `Major Arcana ${k.num}` : `ชุด ${SUITS[k.suit].en} ธาตุ${ELEMENT[k.suit]}`;
+      return `${k.en} (${k.th}) — ${x.rev ? "กลับหัว" : "ตั้งตรง"} — ${kind} — คำสำคัญ: ${m[0]}`;
+    };
+    const cards = state.cards.map((c, i) =>
+      `${i + 1}. ตำแหน่ง "${pos[i].n}" (${pos[i].d}): ${cardLine(c)}` +
+      c.clar.map((x, j) => `\n   ไพ่ขยายใบที่ ${j + 1} ของตำแหน่งนี้: ${cardLine(x)}`).join("")
+    ).join("\n");
+    return `คุณเป็นนักอ่านไพ่ทาโรต์ระบบ Rider–Waite ที่มีประสบการณ์สูง ตีความเป็นภาษาไทยให้ละเอียดที่สุดและตรงกับคำถามของผู้ถาม พูดตรง ไม่อวยเกินจริง ถ้าไพ่ชี้ด้านลบให้บอกตรง ๆ พร้อมทางแก้
+
+คำถาม: ${state.q || "(ไม่ได้ระบุคำถาม ให้อ่านภาพรวมชีวิตช่วงนี้)"}
+หมวดคำถาม: ${TOPICS[topic].th}
+รูปแบบการวาง: ${SPREAD_NAME[state.n]}
+ไพ่ที่เปิดได้:
+${cards}
+
+หลักการตีความ:
+- อ่านทุกใบผ่านเลนส์ของคำถามนี้โดยตรง อย่าเขียนความหมายทั่วไปที่ใช้กับคำถามไหนก็ได้
+- ไพ่กลับหัวหมายถึงพลังที่ถูกปิดกั้น ล่าช้า หันเข้าข้างใน หรือแสดงออกมาก/น้อยเกินไป ไม่ใช่แค่ความหมายตรงข้าม
+- ไพ่ขยายใช้ขยายความใบหลักของตำแหน่งนั้นเพื่อคลายความกำกวม ไม่ได้แทนที่ใบหลัก
+- พิจารณาความเชื่อมโยงระหว่างตำแหน่ง สัดส่วนไพ่ใหญ่ ชุดและธาตุที่เด่นหรือขาด ธาตุที่เสริมหรือขัดกัน (ไฟ+ลม เสริม, น้ำ+ดิน เสริม, ไฟ+น้ำ ขัด, ลม+ดิน ขัด) เลขที่ซ้ำ และไพ่บุคคลที่อาจหมายถึงคนจริงในเรื่อง
+- ถ้าคำถามเป็นแบบใช่/ไม่ใช่ ให้ตอบแนวโน้มให้ชัดพร้อมระดับความมั่นใจ (สูง/กลาง/ต่ำ) และเหตุผลจากไพ่
+- ถ้าคำถามเกี่ยวกับสุขภาพ กฎหมาย หรือการเงินที่มีความเสี่ยงสูง ให้ระบุว่าไพ่ไม่ใช่คำแนะนำทางวิชาชีพ และควรปรึกษาผู้เชี่ยวชาญ
+- ถ้าไพ่ขัดกันเองหรือตีความได้หลายทาง ให้บอกตรง ๆ ว่ากำกวม อย่าฝืนฟันธง
+
+รูปแบบคำตอบ (Markdown ภาษาไทย):
+## คำตอบโดยสรุป
+2–4 ประโยค ตอบคำถามตรง ๆ
+## อ่านทีละตำแหน่ง
+ใช้หัวข้อ ### ต่อหนึ่งตำแหน่ง อธิบายว่าไพ่ใบนั้นบอกอะไรเกี่ยวกับคำถามนี้ รวมไพ่ขยายถ้ามี
+## ความเชื่อมโยงของไพ่
+## ช่วงเวลาและสัญญาณที่ควรสังเกต
+## คำแนะนำที่ทำได้จริง
+เป็น bullet 3–5 ข้อ
+## สิ่งที่ควรระวัง
+
+บรรทัดสุดท้ายของคำตอบต้องอยู่ในรูปแบบนี้เท่านั้น โดยไม่มีข้อความอื่นต่อท้าย:
+CLARITY: ชัดเจน หรือ กำกวม; CLARIFY: เลขตำแหน่งที่ควรเปิดไพ่ขยายคั่นด้วยจุลภาค หรือ - ถ้าไม่จำเป็น`;
+  }
+
+  const AI_ERR = {
+    not_granted: "ยังไม่ได้อนุญาตให้หน้านี้ใช้ Claude",
+    sampling_disabled: "บัญชีนี้ใช้ Claude จากหน้านี้ไม่ได้",
+    rate_limited: "ใช้งานถี่เกินไปหรือถึงขีดจำกัดการใช้งาน ลองใหม่อีกสักครู่",
+    session_expired: "กรุณาเข้าสู่ระบบ claude.ai ใหม่",
+    refused: "Claude ไม่ตอบคำถามนี้ ลองปรับถ้อยคำของคำถาม",
+    empty_completion: "ไม่ได้รับคำตอบ ลองใหม่อีกครั้ง",
+    prompt_too_large: "ข้อมูลยาวเกินไป ลองลดจำนวนไพ่ขยาย"
+  };
+  const AI_OFF = new Set(["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"]);
+
+  async function askAI() {
+    if (!sample || !state) return;
+    if (ai.ctl) ai.ctl.abort();
+    const ctl = new AbortController();
+    Object.assign(ai, { status: "thinking", text: "", clarity: "", clarify: [], err: "", sig: sigOf(), ctl });
+    renderAI();
+    try {
+      await sample(buildPrompt(), {
+        signal: ctl.signal,
+        onText: ({ text }) => { ai.text = text; ai.status = "streaming"; paintAIText(); }
+      });
+      const m = ai.text.match(/CLARITY:\s*([^;\n]+);\s*CLARIFY:\s*([^\n]*)/);
+      if (m) {
+        ai.clarity = m[1].replace(/\*/g, "").trim();
+        ai.clarify = [...new Set((m[2].match(/\d+/g) || []).map(Number).filter((x) => x >= 1 && x <= state.n))];
+      }
+      ai.status = "done";
+    } catch (e) {
+      if (e && e.code === "cancelled") { ai.status = ai.text ? "done" : "idle"; ai.text = e.text || ai.text; }
+      else {
+        ai.text = e && e.code === "refused" ? "" : (e && e.text) || ai.text;
+        ai.err = (e && AI_ERR[e.code]) || "เชื่อมต่อไม่สำเร็จ ลองอีกครั้ง";
+        ai.status = "error";
+        if (e && AI_OFF.has(e.code)) ai.off = true;
+      }
+    }
+    if (ai.ctl === ctl) ai.ctl = null;
+    renderAI();
+  }
+
+  function paintAIText() {
+    const out = $("#aiOut");
+    if (!out) return renderAI();
+    out.innerHTML = md(stripMeta(ai.text));
+  }
+
+  function renderAI() {
+    const box = $("#ai");
+    const allOpen = state && state.open.every(Boolean);
+    if (!sample || !allOpen) { box.hidden = true; return; }
+    box.hidden = false;
+    const busy = ai.status === "thinking" || ai.status === "streaming";
+    const stale = ai.text && ai.sig !== sigOf();
+    const pos = SPREADS[state.n];
+    let html = `<h2>ตีความเชิงลึกตามคำถาม</h2>
+      <p class="note">Claude อ่านคำถาม หมวด ตำแหน่ง ไพ่ทุกใบรวมไพ่ขยาย แล้วเขียนคำทำนายเฉพาะเรื่องของคุณ ใช้ปริมาณการใช้งาน Claude ของบัญชีที่เปิดหน้านี้ และใช้เวลาประมาณ 20–60 วินาที</p>`;
+    if (ai.off) html += `<p class="err">${ai.err}</p>`;
+    else {
+      html += `<div class="actions">${busy ? `<button type="button" class="btn ghost" id="aiStop">หยุด</button>`
+        : `<button type="button" class="btn" id="aiAsk">${ai.text ? (stale ? "ตีความใหม่ (รวมไพ่ขยายล่าสุด)" : "ตีความใหม่อีกครั้ง") : "ตีความเชิงลึก"}</button>`}</div>`;
+      if (stale && !busy) html += `<p class="note">ไพ่หรือคำถามเปลี่ยนหลังการตีความครั้งล่าสุด กด "ตีความใหม่" เพื่อรวมข้อมูลล่าสุด</p>`;
+      if (ai.status === "thinking") html += `<p class="thinking">กำลังอ่านไพ่…</p>`;
+      if (ai.err) html += `<p class="err">${ai.err}</p>`;
+    }
+    html += `<div class="ai-out" id="aiOut">${ai.text ? md(stripMeta(ai.text)) : ""}</div>`;
+    if (ai.status === "done" && !stale && ai.clarity) {
+      const amb = /กำกวม/.test(ai.clarity);
+      const targets = ai.clarify.filter((p) => state.cards[p - 1].clar.length < MAX_CLAR);
+      html += `<div class="clarity ${amb ? "" : "ok"}"><p><b>Claude ประเมินว่า: ${esc(ai.clarity)}</b>${targets.length ? ` แนะนำเปิดไพ่ขยายที่ตำแหน่ง ${targets.map((p) => `${p} ${pos[p - 1].n}`).join(", ")}` : ""}</p>
+        ${targets.length ? `<div class="actions">${targets.map((p) => `<button type="button" class="btn small" data-clar="${p - 1}">เปิดไพ่ขยายตำแหน่ง ${p}</button>`).join("")}</div>` : ""}</div>`;
+    }
+    box.innerHTML = html;
+  }
+
+  // ---------- คัดลอก / ประวัติ ----------
   function copyReading() {
     const text = readingText();
-    const done = () => toast("คัดลอกแล้ว");
     try {
-      navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text));
+      navigator.clipboard.writeText(text).then(() => toast("คัดลอกแล้ว"), () => fallbackCopy(text));
     } catch { fallbackCopy(text); }
   }
   function fallbackCopy(text) {
@@ -526,30 +921,47 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
   }
 
   function saveHistory() {
-    if (state.saved) return;
-    state.saved = true;
-    const h = store.get("tarot.history", []);
-    h.unshift({ t: Date.now(), q: state.q, n: state.n, c: state.cards.map((c) => [c.id, c.rev ? 1 : 0]) });
+    if (!state || !state.open.every(Boolean)) return;
+    const h = store.get("tarot.history", []).filter((r) => r.t !== state.t);
+    h.unshift({ t: state.t, q: state.q, n: state.n, c: state.cards.map((c) => [c.id, c.rev ? 1 : 0, c.clar.map((x) => [x.id, x.rev ? 1 : 0])]) });
     store.set("tarot.history", h.slice(0, 30));
     renderHistory();
   }
   function renderHistory() {
     const h = store.get("tarot.history", []);
     const fmt = new Intl.DateTimeFormat("th-TH", { dateStyle: "medium", timeStyle: "short" });
+    const nm = ([id, rv]) => DECK[id] ? esc(DECK[id].en) + (rv ? " (กลับหัว)" : "") : "";
     $("#hist").innerHTML = h.length ? h.map((r) => `<li>
       <time>${fmt.format(new Date(r.t))} · ${r.n} ใบ</time>
       ${r.q ? `<span>${esc(r.q)}</span>` : ""}
-      <span style="color:var(--muted)">${r.c.map(([id, rv]) => DECK[id] ? esc(DECK[id].en) + (rv ? " (กลับหัว)" : "") : "").join(" · ")}</span>
+      <span class="muted">${r.c.map((c) => nm(c) + ((c[2] || []).length ? ` [+ ${c[2].map(nm).join(", ")}]` : "")).join(" · ")}</span>
     </li>`).join("") : `<li class="note">ยังไม่มีประวัติ</li>`;
   }
 
+  // ---------- เหตุการณ์ ----------
   $("#spreadSel").addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b) return;
-    spreadN = +b.dataset.n; store.set("tarot.spread", spreadN); syncSpreadButtons(); deal(true);
+    spreadN = +b.dataset.n; store.set("tarot.spread", spreadN); deal(true);
   });
+  $("#topicSel").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    topicSel = b.dataset.t; store.set("tarot.topic", topicSel); syncButtons(); renderReading();
+  });
+  $("#q").addEventListener("input", () => {
+    if (state) state.q = $("#q").value.trim();
+    syncButtons();
+  });
+  $("#q").addEventListener("change", () => { renderReading(); });
   $("#revOn").addEventListener("change", (e) => store.set("tarot.rev", e.target.checked));
   $("#spread").addEventListener("click", (e) => {
     const s = e.target.closest(".slot"); if (s) open(+s.dataset.i);
+  });
+  document.addEventListener("click", (e) => {
+    const c = e.target.closest("[data-clar]");
+    if (c) return drawClarifier(+c.dataset.clar);
+    if (e.target.closest("#copy")) return copyReading();
+    if (e.target.closest("#aiAsk")) return askAI();
+    if (e.target.closest("#aiStop")) { if (ai.ctl) ai.ctl.abort(); }
   });
   $("#shuffle").addEventListener("click", () => {
     const deck = $("#deck");
@@ -564,11 +976,14 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
     state.cards.forEach((_, i) => setTimeout(() => open(i), i * 120));
   });
 
-  syncSpreadButtons();
+  syncButtons();
   renderHistory();
   deal(false);
 
-  if ("serviceWorker" in navigator && location.protocol === "https:") {
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("sample").then((s) => { sample = s; renderAI(); }, () => {});
+  }
+  if ("serviceWorker" in navigator && location.protocol === "https:" && !window.claude) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   }
 })();
