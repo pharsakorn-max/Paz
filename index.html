@@ -14,7 +14,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chonburi&family=Cormorant+SC:wght@500;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chonburi&family=Cormorant+SC:wght@500;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Noto+Serif+Devanagari:wght@500;700&display=swap">
 <style>
 /* Layout: one column "reading table" — controls on top, felt table with the spread, then the written reading. Single committed dark look (candle-lit table). */
 :root {
@@ -203,6 +203,39 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
 @keyframes pulse { 50% { opacity: .45; } }
 .err { color: var(--rev); margin: 0; }
 
+/* สำรับเทพฮินดู: ราตรีในเทวาลัย สีแดงเลือดหมู ทองดาวเรือง และชาดแดง */
+:root[data-deck="hindu"] {
+  --bg: #1f0d14;
+  --felt: #2c121c;
+  --felt-edge: #4a1d2c;
+  --gold: #e6a93a;
+  --gold-soft: rgba(230, 169, 58, .2);
+  --rev: #ff7a59;
+  --muted: #c4a7a9;
+}
+:root[data-deck="hindu"] .back {
+  background:
+    radial-gradient(circle at 50% 50%, var(--gold) 0 6%, transparent 7% 20%, var(--gold-soft) 21% 23%, transparent 24%),
+    repeating-conic-gradient(from 0deg at 50% 50%, rgba(230,169,58,.22) 0 10deg, transparent 10deg 20deg),
+    #5a1626;
+}
+.face.hindu { background: linear-gradient(180deg, #7a1d2e, #4e1020); color: #f6dfb0; border-color: #e6a93a; padding: 7% 5%; grid-template-rows: auto 1fr auto auto; }
+:root[data-deck="hindu"] .deck .stack i { background: #5a1626; }
+/* ไม่หมุนรูปเทพ: ใบอุปสรรคใน Celtic Cross วางเยื้องแทนการวางขวาง */
+:root[data-deck="hindu"] .slot.cross, :root[data-deck="hindu"] .slot.cross.reversed { transform: translate(26%, 20%) scale(.72); }
+.face.hindu.major { background: radial-gradient(120% 80% at 50% 40%, #a8322a, #5a1424 70%); }
+.face.hindu .num { color: #f2c46a; font-family: var(--font-body); font-size: clamp(.55rem, 2.4vw, .8rem); letter-spacing: .02em; }
+.face.hindu .emb { display: grid; place-items: center; width: 100%; color: #f2c46a; }
+.face.hindu .emb svg { width: 58%; height: auto; color: #f2c46a; }
+.face.hindu .om { font-family: "Noto Serif Devanagari", serif; font-size: clamp(1.4rem, 8vw, 2.8rem); line-height: 1; }
+.face.hindu .nm { display: grid; gap: 1px; font-family: var(--font-body); font-weight: 600; font-size: clamp(.48rem, 2.1vw, .74rem); line-height: 1.15; }
+.face.hindu .deva { font-family: "Noto Serif Devanagari", serif; font-weight: 700; color: #f2c46a; font-size: 1.1em; }
+.face.hindu.rvm { border-color: var(--rev); box-shadow: 0 0 0 2px var(--rev), 0 6px 14px rgba(0,0,0,.35); }
+.face.hindu .thn { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.face.hindu .rvband { align-self: end; width: calc(100% + 12%); margin: 3px -6% -8%; background: var(--rev); color: #2a0b10; font-size: clamp(.5rem, 2vw, .7rem); font-weight: 700; padding: 1px 0; }
+.entry .myth { font-size: .92rem; border-left: 2px solid var(--gold); padding-left: 10px; }
+.entry .myth b { color: var(--gold); }
+
 @media (max-width: 420px) {
   .spread.s10 { column-gap: 6px; }
   .pos { font-size: .66rem; }
@@ -216,14 +249,18 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
 <body>
 <div class="wrap">
   <header>
-    <h1>ไพ่ทาโรต์ 78 ใบ</h1>
-    <p class="sub"><span>Rider–Waite</span> · Major 22 + Minor 56 · มีความหมายทั้งแบบตั้งตรงและกลับหัว</p>
+    <h1 id="appTitle">ไพ่ทาโรต์ 78 ใบ</h1>
+    <p class="sub" id="appSub"><span>Rider–Waite</span> · Major 22 + Minor 56 · มีความหมายทั้งแบบตั้งตรงและกลับหัว</p>
   </header>
 
   <section class="controls" aria-label="ตั้งค่าการเปิดไพ่">
     <label class="field" for="q">คำถามของคุณ (ไม่บังคับ)
       <input type="text" id="q" maxlength="140" placeholder="เช่น งานใหม่ที่กำลังพิจารณาจะเป็นอย่างไร">
     </label>
+    <div class="seg" role="group" aria-label="สำรับไพ่" id="deckSel">
+      <button type="button" data-d="rws">สำรับ Rider–Waite</button>
+      <button type="button" data-d="hindu">สำรับเทพฮินดู</button>
+    </div>
     <div class="seg" role="group" aria-label="รูปแบบการวางไพ่" id="spreadSel">
       <button type="button" data-n="1">1 ใบ · คำตอบ</button>
       <button type="button" data-n="3" aria-pressed="true">3 ใบ · อดีต ปัจจุบัน อนาคต</button>
@@ -419,6 +456,146 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
   const AMBIG = new Set(["The High Priestess", "Wheel of Fortune", "The Hanged Man", "The Moon", "Two of Swords", "Seven of Cups", "Four of Cups", "Two of Pentacles"]
     .map((n) => DECK.findIndex((c) => c.en === n)));
 
+  // ---------- สำรับเทพฮินดู ----------
+  // Major: [ชื่อไทย, เทวนาครี, สัญลักษณ์, ตำนาน]
+  const H_MAJOR = [
+    ["ฤๅษีนารท", "नारद", "veena", "ฤๅษีผู้ท่องไปทั้งสามโลกพร้อมพิณวีณา ไม่ยึดติดที่ใด ความอยากรู้ของท่านมักเป็นจุดเริ่มของเรื่องราวใหญ่"],
+    ["พระพิฆเนศ", "गणेश", "om", "ผู้ขจัดอุปสรรคและเทพแห่งการเริ่มต้น ทรงหักงาของตนเป็นปากกาเขียนมหาภารตะ ใช้ทุกสิ่งที่มีให้เกิดผล"],
+    ["พระแม่สรัสวดี", "सरस्वती", "veena", "เทวีแห่งปัญญา ศิลปะ และวาจา ประทับบนดอกบัวขาวริมสายน้ำ ความรู้ของพระนางลึกและเงียบ"],
+    ["พระแม่ลักษมี", "लक्ष्मी", "lotus", "เทวีแห่งความมั่งคั่งที่ผุดขึ้นจากการกวนเกษียรสมุทร เหรียญทองไหลจากพระหัตถ์ไม่ขาดสาย"],
+    ["พระอินทร์", "इन्द्र", "vajra", "ราชาแห่งเทวดาบนช้างไอราวตะ ถือวัชระ ปกครองสวรรค์ด้วยระเบียบและอำนาจ แต่ก็ถูกทดสอบเมื่อหลงในอำนาจ"],
+    ["พระพฤหัสบดี", "बृहस्पति", "om", "คุรุของเหล่าเทวดา ผู้รักษาพระเวทและพิธีกรรม ให้คำแนะนำตามขนบที่สืบทอดมา"],
+    ["ราธา–กฤษณะ", "राधा कृष्ण", "flute", "ความรักของราธากับกฤษณะเป็นแบบอย่างของความรักศักดิ์สิทธิ์ แต่ก็เต็มไปด้วยการเลือกและการพลัดพราก"],
+    ["อรชุนกับสารถีกฤษณะ", "अर्जुन", "bow", "พระกฤษณะเป็นสารถีให้อรชุนในสงครามกุรุเกษตร ชัยชนะมาจากการบังคับใจให้มุ่งไปทางเดียว"],
+    ["พระแม่ทุรคา", "दुर्गा", "trishula", "พระแม่ทุรคาทรงสิงห์ปราบมหิษาสูรที่เทพองค์ใดก็ปราบไม่ได้ พลังของพระแม่คือความกล้าที่สงบ"],
+    ["ทักษิณามูรติ", "दक्षिणामूर्ति", "damaru", "พระศิวะปางบรมครูประทับใต้ต้นไทร สอนศิษย์ด้วยความเงียบ คำตอบมาจากการใคร่ครวญ"],
+    ["จักรสุทรรศน์", "सुदर्शन चक्र", "chakra", "จักรของพระวิษณุหมุนไม่หยุด ตัดสิ่งที่ขวางธรรมะ และเตือนว่ากาลเวลาหมุนเวียนเสมอ"],
+    ["พระยมธรรมราชา", "यम", "gada", "ผู้ชั่งกรรมของทุกชีวิตอย่างเที่ยงตรง ไม่มีใครหนีผลของการกระทำได้"],
+    ["ภีษมะบนเตียงลูกศร", "भीष्म", "bow", "ภีษมะนอนบนเตียงลูกศรรอเวลาที่เหมาะจึงละสังขาร การรอคอยกลายเป็นคำสอนแก่ผู้มาเยือน"],
+    ["พระแม่กาลี", "काली", "khadga", "พระแม่กาลีตัดอัตตาและความยึดติด จุดจบที่น่ากลัวคือการปลดปล่อยให้สิ่งใหม่เกิด"],
+    ["อรรธนารีศวร", "अर्धनारीश्वर", "kalasha", "พระศิวะกับพระแม่ปารวตีรวมเป็นกายเดียว ซีกชายกับซีกหญิงหลอมรวมด้วยความพอดี"],
+    ["มหิษาสูร", "महिषासुर", "chain", "อสูรควายที่หลงในพรว่าไม่มีชายใดฆ่าได้ ความหยิ่งและความอยากที่ไม่สิ้นสุดผูกมัดตัวเอง"],
+    ["นรสิงหาวตาร", "नरसिंह", "pillar", "พระวิษณุออกมาจากเสาหินเป็นนรสิงห์ปราบหิรัณยกศิปุ สิ่งที่คิดว่าแข็งแรงที่สุดแตกในพริบตา"],
+    ["พระแม่คงคา", "गंगा", "wave", "พระแม่คงคาลงจากสวรรค์ผ่านมวยผมพระศิวะมาชำระโลก ความหวังไหลมาหลังความแห้งแล้ง"],
+    ["พระจันทร์", "चन्द्र", "moon", "พระจันทร์ถูกสาปให้มีข้างขึ้นข้างแรม แสงเปลี่ยนทุกคืน สิ่งที่เห็นจึงไม่แน่นอน"],
+    ["พระสุริยะ", "सूर्य", "sun", "พระสุริยะขับรถม้าเจ็ดตัวข้ามฟ้าทุกวัน นำแสงสว่าง ความชัดเจน และชีวิตมาสู่โลก"],
+    ["กัลกยาวตาร", "कल्कि", "shankha", "อวตารองค์สุดท้ายที่จะมาเมื่อสิ้นกลียุค เสียงสังข์ปลุกโลกให้เริ่มยุคใหม่"],
+    ["นาฏราช", "नटराज", "ring", "พระศิวะร่ายรำในวงไฟ ทั้งสร้างและทำลายในจังหวะเดียว จักรวาลครบวงจรและพร้อมเริ่มใหม่"]
+  ];
+  // Minor: [ชื่อไทย, เทวนาครี (เฉพาะไพ่บุคคล), ตำนาน, สัญลักษณ์ไพ่บุคคล]
+  const H_SUIT = {
+    wands: { th: "ชุดอัคนี", el: "ไฟ", emblem: "flame", cards: [
+      ["เปลวไฟของพระอัคนี", "", "พระอัคนีคือไฟศักดิ์สิทธิ์ที่นำเครื่องบูชาไปถึงเทพ ทุกพิธีเริ่มด้วยการจุดไฟ"],
+      ["พระรามมองข้ามทะเล", "", "พระรามยืนที่ชายฝั่งมองไปยังลังกา ต้องวางแผนก่อนข้ามไปช่วยนางสีดา"],
+      ["สร้างสะพานรามเสตุ", "", "กองทัพวานรช่วยกันโยนหินลงทะเลจนเป็นสะพาน งานที่ลงแรงไว้เริ่มเห็นผล"],
+      ["พระรามกลับอโยธยา", "", "ชาวอโยธยาจุดประทีปทั้งเมืองต้อนรับพระรามกลับบ้าน เป็นที่มาของเทศกาลทีปาวลี"],
+      ["การประลองของเจ้าชายกุรุ", "", "เการพและปาณฑพประลองฝีมือต่อหน้าครูโทรณะ การแข่งขันทำให้เก่งขึ้นแต่ก็หว่านเมล็ดความบาดหมาง"],
+      ["อรชุนชนะพิธีสยุมพร", "", "อรชุนยิงศรผ่านตาปลาที่หมุนอยู่ได้ จึงได้นางเทราปตีและได้รับการยอมรับจากทุกคน"],
+      ["อภิมันยุในจักรพยูหะ", "", "อภิมันยุบุกเข้ากองทัพรูปวงจักรเพียงลำพัง ยืนหยัดแม้ถูกล้อมรอบด้าน"],
+      ["หนุมานเหาะข้ามมหาสมุทร", "", "หนุมานกระโดดข้ามทะเลไปลังกาในคราวเดียวเพื่อนำข่าวถึงนางสีดา ทุกอย่างเคลื่อนเร็ว"],
+      ["ปาณฑพปีที่สิบสามของการเนรเทศ", "", "ปีสุดท้ายของการเนรเทศที่ต้องซ่อนตัว เหนื่อยล้าแต่ใกล้ถึงเส้นชัย"],
+      ["หนุมานแบกภูเขาสมุนไพร", "", "หนุมานหาสมุนไพรสัญชีวนีไม่พบ จึงยกทั้งภูเขามาช่วยพระลักษมณ์ ภาระหนักที่แบกเพราะความรับผิดชอบ"],
+      ["ธรุวกุมาร", "ध्रुव", "เด็กชายธรุวะบำเพ็ญเพียรตั้งแต่เยาว์วัยจนพระวิษณุประทานพร และกลายเป็นดาวเหนือ", "star"],
+      ["พระขันธกุมาร (มุรุกัน)", "कार्तिकेय", "แม่ทัพแห่งเทวดาบนนกยูง ออกศึกอย่างรวดเร็วและกล้าหาญ ชาวทมิฬนับถือในนามมุรุกัน", "vel"],
+      ["พระนางสัตยภามา", "सत्यभामा", "มเหสีผู้กล้าของพระกฤษณะ ออกรบปราบนรกาสูรด้วยตัวเอง มั่นใจและมีเสน่ห์", "bow"],
+      ["พระอัคนี", "अग्नि", "เทพแห่งไฟและผู้นำพิธีบูชา เป็นผู้นำที่จุดไฟให้ผู้อื่น", "flame"]
+    ]},
+    cups: { th: "ชุดวรุณ", el: "น้ำ", emblem: "kalasha", cards: [
+      ["หม้ออมฤตจากเกษียรสมุทร", "", "เมื่อกวนเกษียรสมุทร หม้ออมฤตผุดขึ้นมา น้ำทิพย์แห่งความรักและชีวิตเริ่มไหลล้น"],
+      ["พระนลกับนางทมยันตี", "", "หงส์ทองนำสาส์นรักระหว่างพระนลกับนางทมยันตี จนทั้งสองเลือกกันท่ามกลางเทวดาที่มาสู่ขอ"],
+      ["ระบำราสลีลา", "", "เหล่าโคปีร่ายรำกับพระกฤษณะใต้แสงจันทร์ในวฤนทาวัน ความสุขของการอยู่ร่วมกัน"],
+      ["กุมภกรรณหลับใหล", "", "กุมภกรรณหลับครั้งละหกเดือน ไม่สนใจสิ่งรอบตัว แม้โอกาสหรือคำเตือนจะอยู่ตรงหน้า"],
+      ["ท้าวทศรถโศกเศร้า", "", "ท้าวทศรถเสียพระทัยเมื่อพระรามต้องเดินดง มัวโศกกับสิ่งที่เสียจนมองไม่เห็นสิ่งที่เหลือ"],
+      ["กฤษณะคิดถึงวฤนทาวัน", "", "แม้เป็นกษัตริย์ที่ทวารกาแล้ว พระกฤษณะยังคิดถึงวัยเด็กกับเหล่าโคปาลในวฤนทาวัน"],
+      ["นางโมหินีแจกอมฤต", "", "พระวิษณุแปลงเป็นนางโมหินีผู้งดงามจนเหล่าอสูรหลงลืมตัว สิ่งที่เห็นอาจเป็นมายา"],
+      ["เจ้าชายสิทธัตถะออกผนวช", "", "ในคติฮินดูพระพุทธเจ้าคืออวตารหนึ่งของพระวิษณุ เดินจากความสุขในวังเพื่อค้นหาความหมาย"],
+      ["วัวกามเธนุ", "", "วัวศักดิ์สิทธิ์ที่ประทานทุกสิ่งที่ปรารถนา ไพ่แห่งความสมหวัง"],
+      ["รามทรรพาร์", "", "พระราม นางสีดา พระลักษมณ์ และหนุมานพร้อมหน้ากันที่อโยธยา ภาพของครอบครัวที่สมบูรณ์"],
+      ["บาลกฤษณะ", "बाल कृष्ण", "กฤษณะวัยเด็กแอบขโมยเนยจนแม่ยโศธาต้องดุ ความไร้เดียงสาและความรักบริสุทธิ์", "kalasha"],
+      ["พระกามเทพ", "कामदेव", "เทพแห่งความรักขี่นกแก้ว ยิงศรดอกไม้ให้คนตกหลุมรัก", "bow"],
+      ["พระแม่ปารวตี", "पार्वती", "พระมารดาผู้เปี่ยมเมตตา บำเพ็ญตบะด้วยความรักจนได้พระศิวะเป็นคู่ เข้าใจใจผู้อื่นอย่างลึกซึ้ง", "lotus"],
+      ["พระวรุณ", "वरुण", "เทพแห่งน้ำและมหาสมุทร ผู้รักษาระเบียบของจักรวาล สงบเหมือนผิวน้ำลึก", "wave"]
+    ]},
+    swords: { th: "ชุดวายุ", el: "ลม", emblem: "khadga", cards: [
+      ["ดาบนันทกะของพระวิษณุ", "", "ดาบแห่งปัญญาที่ตัดความไม่รู้ ความจริงที่คมชัด"],
+      ["อรชุนวางคันศร", "", "ก่อนสงครามกุรุเกษตร อรชุนวางคันศรเพราะเลือกไม่ได้ว่าจะรบกับญาติหรือไม่"],
+      ["พระรามส่งนางสีดาออกจากเมือง", "", "แม้นางสีดาบริสุทธิ์ พระรามก็ต้องส่งนางออกจากเมืองเพราะเสียงครหา ความจริงที่เจ็บปวด"],
+      ["พระวิษณุบรรทมสินธุ์", "", "พระวิษณุบรรทมบนพญาอนันตนาคในเกษียรสมุทร พักเพื่อรอเวลาสร้างโลกใหม่"],
+      ["ศกุนิชนะเกมสกา", "", "ศกุนิโกงลูกเต๋าจนปาณฑพเสียทุกอย่าง ชัยชนะที่นำไปสู่สงครามใหญ่"],
+      ["ข้ามคงคากับคนเรือคุหะ", "", "คุหะพาพระราม นางสีดา และพระลักษมณ์ข้ามแม่น้ำคงคาออกจากเมืองเข้าสู่ป่า"],
+      ["ทศกัณฐ์แปลงเป็นฤๅษี", "", "ทศกัณฐ์ปลอมเป็นฤๅษีเพื่อลักพานางสีดา เล่ห์กลที่แฝงมากับรูปลักษณ์น่าเชื่อถือ"],
+      ["นางสีดาในสวนอโศก", "", "นางสีดาถูกกักไว้ในสวนอโศกของลังกา แต่ใจไม่เคยถูกจองจำ"],
+      ["พญากังสะนอนไม่หลับ", "", "กังสะกลัวคำทำนายว่าหลานจะฆ่าตนจนนอนไม่หลับ ความกลัวที่สร้างขึ้นเอง"],
+      ["กรรณะสิ้นใจ", "", "คำสาปทำให้ล้อรถศึกของกรรณะจมดินและลืมมนตร์ในวันสุดท้าย จุดจบที่เจ็บปวดของวีรบุรุษ"],
+      ["นจิเกตัส", "नचिकेता", "เด็กหนุ่มผู้กล้าถามพระยมถึงความลับของความตาย ไม่ยอมรับคำตอบผิวเผิน", "flame"],
+      ["ปรศุราม", "परशुराम", "อวตารผู้ถือขวาน ออกปราบกษัตริย์ทรราชอย่างไม่หยุดยั้ง เด็ดขาดและรวดเร็ว", "parashu"],
+      ["พระนางเทราปตี", "द्रौपदी", "ราชินีผู้กล้าตั้งคำถามกลางท้องพระโรงเมื่อถูกลบหลู่ ตรงไปตรงมาและเฉียบคม", "flame"],
+      ["วิทูร", "विदुर", "มหาอำมาตย์ผู้ซื่อตรงแห่งหัสตินาปุระ กล้าพูดความจริงต่อกษัตริย์แม้ไม่มีใครอยากฟัง", "om"]
+    ]},
+    pentacles: { th: "ชุดปฤถวี", el: "ดิน", emblem: "coin", cards: [
+      ["เหรียญทองของพระแม่ลักษมี", "", "เหรียญทองที่ไหลจากพระหัตถ์พระแม่ลักษมี โอกาสที่จับต้องได้"],
+      ["ภีมะเป็นพ่อครัวในวังวิราฏ", "", "ในปีที่ต้องปลอมตัว ภีมะผู้แข็งแรงที่สุดต้องเป็นพ่อครัว ปรับตัวและรับหลายบทบาทพร้อมกัน"],
+      ["พระวิศวกรรมสร้างทวารกา", "", "สถาปนิกแห่งเทพสร้างนครทวารกากลางทะเลด้วยฝีมือและความร่วมมือ"],
+      ["ทุรโยธน์ไม่ยอมแบ่งแผ่นดิน", "", "ทุรโยธน์ไม่ยอมแบ่งที่ดินให้ปาณฑพแม้เท่าปลายเข็ม การยึดถือที่นำไปสู่การสูญเสียทั้งหมด"],
+      ["สุทามะเดินไปทวารกา", "", "สุทามะเพื่อนยากจนของพระกฤษณะเดินเท้าไปขอความช่วยเหลือ ความช่วยเหลืออยู่ใกล้กว่าที่คิด"],
+      ["ท้าวพลีถวายแผ่นดินแก่วามนะ", "", "ท้าวพลียกที่ดินสามก้าวให้พราหมณ์เตี้ย การให้ที่มีผลเกินคาด"],
+      ["ภคีรถบำเพ็ญตบะ", "", "ภคีรถบำเพ็ญเพียรหลายปีเพื่อนำคงคาลงมาช่วยบรรพบุรุษ ความอดทนที่ให้ผลระยะยาว"],
+      ["วาลมีกิรจนารามายณะ", "", "วาลมีกิแต่งรามายณะทีละบท ฝีมือเกิดจากการทำซ้ำอย่างประณีต"],
+      ["นครอลกาของท้าวกุเวร", "", "นครแห่งความมั่งคั่งบนเทือกเขาหิมาลัย ความสุขสบายที่ได้มาจากความพยายาม"],
+      ["สุริยวงศ์แห่งอโยธยา", "", "ราชวงศ์ที่สืบจากพระสุริยะจนถึงพระราม ความมั่งคั่งและเกียรติที่ส่งต่อหลายรุ่น"],
+      ["เอกลัพย์", "एकलव्य", "เด็กหนุ่มที่ฝึกยิงธนูเองหน้ารูปปั้นครูโทรณะจนเก่งกว่าศิษย์เอก ความตั้งใจเรียนรู้", "bow"],
+      ["โคนนทิ", "नन्दी", "พาหนะผู้ภักดีของพระศิวะ รอคอยหน้าเทวาลัยอย่างสม่ำเสมอ ช้าแต่มั่นคง", "trishula"],
+      ["พระแม่อันนปูรณา", "अन्नपूर्णा", "เทวีแห่งอาหารผู้เลี้ยงดูทุกชีวิต แม้พระศิวะยังมาขอข้าวจากพระนาง", "kalasha"],
+      ["ท้าวกุเวร", "कुबेर", "เทพแห่งทรัพย์และผู้ดูแลคลังสมบัติของเทวดา มั่งคั่งและมั่นคง", "coin"]
+    ]}
+  };
+  const THAI_DIGIT = (n) => String(n).replace(/\d/g, (d) => "๐๑๒๓๔๕๖๗๘๙"[d]);
+  const S = (d, extra = "") => `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"${extra}>${d}</svg>`;
+  const EMBLEM = {
+    lotus: S('<path d="M24 40c-6-5-7-13 0-25 7 12 6 20 0 25Z"/><path d="M24 40c-9 0-15-6-16-14 8 0 13 5 16 14Z"/><path d="M24 40c9 0 15-6 16-14-8 0-13 5-16 14Z"/><path d="M8 42h32"/>'),
+    trishula: S('<path d="M24 44V12"/><path d="M13 8c0 9 4 13 11 13s11-4 11-13"/><path d="M24 4v8"/><path d="M18 32h12"/>'),
+    chakra: S('<circle cx="24" cy="24" r="17"/><circle cx="24" cy="24" r="4"/><path d="M24 7v13M24 28v13M7 24h13M28 24h13M12 12l9 9M27 27l9 9M36 12l-9 9M21 27l-9 9"/>'),
+    flame: S('<path d="M24 44c-8 0-12-6-12-12 0-8 8-12 8-22 4 4 6 8 6 12 2-2 3-4 3-7 4 5 7 10 7 17 0 6-4 12-12 12Z"/><path d="M24 44c-3 0-5-2-5-5 0-4 5-6 5-10 3 3 5 6 5 10 0 3-2 5-5 5Z"/>'),
+    kalasha: S('<path d="M15 20h18"/><path d="M18 20c-6 4-8 10-6 15 2 5 7 7 12 7s10-2 12-7c2-5 0-11-6-15"/><path d="M24 20c-3-4-3-8 0-12 3 4 3 8 0 12Z"/><path d="M24 15c-4-3-8-3-11-1M24 15c4-3 8-3 11-1"/>'),
+    khadga: S('<path d="M24 4c3 6 4 14 2 28h-4c-2-14-1-22 2-28Z"/><path d="M15 32h18M24 32v9M21 44h6"/>'),
+    coin: S('<circle cx="24" cy="24" r="18"/><circle cx="24" cy="24" r="12"/><path d="M24 16c-3 3-3 6 0 8 3-2 3-5 0-8ZM16 26c3 0 6 1 8 4 2-3 5-4 8-4"/>'),
+    moon: S('<path d="M30 6a18 18 0 1 0 12 30A15 15 0 1 1 30 6Z"/>'),
+    sun: S('<circle cx="24" cy="24" r="9"/><path d="M24 4v6M24 38v6M4 24h6M38 24h6M10 10l4 4M34 34l4 4M38 10l-4 4M14 34l-4 4"/>'),
+    bow: S('<path d="M14 6c14 8 14 28 0 36"/><path d="M14 6v36"/><path d="M8 24h32M35 20l5 4-5 4"/>'),
+    gada: S('<circle cx="24" cy="14" r="9"/><path d="M24 23v21M20 44h8M17 10h14M17 18h14"/>'),
+    flute: S('<path d="M6 36 40 12"/><path d="M14 31l1 1M20 27l1 1M26 23l1 1M32 19l1 1"/><path d="M36 6c4 2 6 6 5 10-4-1-6-5-5-10Z"/>'),
+    damaru: S('<path d="M14 6h20L24 24Z"/><path d="M14 42h20L24 24Z"/><path d="M24 24c-6 2-10 6-12 10M24 24c6 2 10 6 12 10"/>'),
+    shankha: S('<path d="M12 32c0-13 9-24 22-24-2 6-2 12 2 17-5 2-7 6-7 12-6 0-10 2-12 6-3-3-5-7-5-11Z"/><path d="M22 24c2-4 5-6 9-6"/>'),
+    veena: S('<path d="M10 38 38 10"/><circle cx="10" cy="38" r="6"/><circle cx="36" cy="12" r="3"/><path d="M16 30l2 2M22 24l2 2M28 18l2 2"/>'),
+    vajra: S('<path d="M24 4v40"/><circle cx="24" cy="24" r="3"/><path d="M17 8c0 7 7 9 7 13 0-4 7-6 7-13M17 40c0-7 7-9 7-13 0 4 7 6 7 13"/>'),
+    pillar: S('<path d="M16 9h16v32H16Z"/><path d="M13 9h22M13 41h22"/><path d="M23 9l4 11-4 7 4 14"/>'),
+    wave: S('<path d="M4 18c6-6 10-6 16 0s10 6 16 0 8-4 8-4"/><path d="M4 28c6-6 10-6 16 0s10 6 16 0 8-4 8-4"/><path d="M4 38c6-6 10-6 16 0s10 6 16 0 8-4 8-4"/>'),
+    chain: S('<rect x="5" y="17" width="20" height="14" rx="7"/><rect x="23" y="17" width="20" height="14" rx="7"/>'),
+    ring: S('<circle cx="24" cy="24" r="15"/><path d="M24 3v4M24 41v4M3 24h4M41 24h4M9 9l3 3M36 36l3 3M39 9l-3 3M12 36l-3 3"/><path d="M24 16v16M18 22l6-4 6 4M20 34l4-6 4 6"/>'),
+    vel: S('<path d="M24 44V22"/><path d="M24 4c7 6 7 13 0 18-7-5-7-12 0-18Z"/><path d="M19 26h10"/>'),
+    parashu: S('<path d="M16 44 30 8"/><path d="M27 13c9-1 14 5 12 13-7 0-12-5-12-13Z"/>'),
+    star: S('<path d="M24 4l4 14 14 6-14 6-4 14-4-14-14-6 14-6Z"/>'),
+    om: '<span class="om">ॐ</span>'
+  };
+
+  let deck = "rws";
+  const H = (c) => c.arcana === "major" ? { th: H_MAJOR[c.id][0], deva: H_MAJOR[c.id][1], emblem: H_MAJOR[c.id][2], myth: H_MAJOR[c.id][3] }
+    : (() => { const s = H_SUIT[c.suit], x = s.cards[c.rank]; return { th: x[0], deva: x[1], emblem: x[3] || s.emblem, myth: x[2] }; })();
+  const nm = (c) => deck === "hindu" ? H(c).th : c.en;
+  const sub = (c) => deck === "hindu" ? c.en : c.th;
+  const suitTh = (k) => deck === "hindu" ? `${H_SUIT[k].th} (ธาตุ${H_SUIT[k].el}, ${SUITS[k].en})` : `ชุด${SUITS[k].th} (${SUITS[k].en}, ธาตุ${SUITS[k].el})`;
+
+  function hinduFace(c, rev) {
+    const h = H(c);
+    const num = c.arcana === "major" ? c.num : c.rank >= 10 ? ["บาล", "โยธา", "ราณี", "ราชา"][c.rank - 10] : `${THAI_DIGIT(c.rank + 1)} ${H_SUIT[c.suit].th.replace("ชุด", "")}`;
+    return `<div class="face hindu${c.arcana === "major" ? " major" : ""}${rev ? " rvm" : ""}">
+      <span class="num">${num}</span>
+      <span class="emb">${EMBLEM[h.emblem] || EMBLEM.om}</span>
+      <span class="nm">${h.deva ? `<span class="deva">${h.deva}</span>` : ""}<span class="thn">${esc(h.th)}</span></span>
+      ${rev ? '<span class="rvband">กลับหัว</span>' : ""}
+    </div>`;
+  }
+
   const ELEMENT = { wands: "ไฟ", cups: "น้ำ", swords: "ลม", pentacles: "ดิน" };
   const NUM_MEAN = ["จุดเริ่มต้นหรือเมล็ดพันธุ์ของเรื่อง", "การเลือก ความสัมพันธ์ หรือสองทาง", "การเติบโตและผลแรกที่เริ่มเห็น", "ความมั่นคง หรือการหยุดนิ่ง", "ความขัดแย้งและการเปลี่ยนแปลง", "การปรับสมดุลและการให้–รับ", "บททดสอบและการประเมิน", "การเคลื่อนไหวและการลงแรง", "ใกล้ถึงจุดหมาย", "จบวงจรหนึ่ง เตรียมเริ่มใหม่"];
   const COURT = ["อาจหมายถึงเด็ก คนอายุน้อย มือใหม่ หรือข่าวสาร", "อาจหมายถึงคนหนุ่มสาวที่กระตือรือร้น หรือเรื่องที่เคลื่อนไหวเร็ว", "อาจหมายถึงผู้หญิงหรือผู้ใหญ่ที่มีอิทธิพล หรือด้านที่ต้องใช้ความเข้าใจ", "อาจหมายถึงผู้ชายหรือผู้มีอำนาจ เช่น หัวหน้า หรือด้านที่ต้องใช้ภาวะผู้นำ"];
@@ -472,12 +649,19 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
 
   function syncButtons() {
     document.querySelectorAll("#spreadSel button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.n === spreadN)));
+    document.querySelectorAll("#deckSel button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.d === deck)));
+    document.documentElement.dataset.deck = deck;
+    $("#appTitle").textContent = deck === "hindu" ? "Hindu God Tarot" : "ไพ่ทาโรต์ 78 ใบ";
+    $("#appSub").innerHTML = deck === "hindu"
+      ? "ไพ่ทาโรต์เทพฮินดู 78 ใบ · โครงสร้าง Rider–Waite · รูปเทพตั้งตรงเสมอ ไพ่กลับหัวแสดงด้วยกรอบแดง"
+      : "<span>Rider–Waite</span> · Major 22 + Minor 56 · มีความหมายทั้งแบบตั้งตรงและกลับหัว";
     document.querySelectorAll("#topicSel button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.t === topicSel)));
     const t = topicOf();
     $("#topicAuto").textContent = topicSel === "auto" ? `ตรวจพบ: ${TOPICS[t].th}` : "";
   }
 
-  function faceHTML(c) {
+  function faceHTML(c, rev) {
+    if (deck === "hindu") return hinduFace(c, rev);
     if (c.arcana === "major") {
       return `<div class="face major"><span class="num">${c.num}</span><span class="big">${GLYPH.major.replace("<svg", '<svg style="width:44%"')}</span><span class="nm">${esc(c.en)}</span></div>`;
     }
@@ -508,11 +692,11 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
       const cross = state.n === 10 && i === 1;
       const area = state.n === 10 ? `grid-area:p${cross ? 1 : i + 1};` : "";
       const delay = animate ? `animation-delay:${i * 70}ms;` : "";
-      const label = state.open[i] ? `${pos[i].n}: ${card.en}${c.rev ? " กลับหัว" : ""}` : `ตำแหน่ง ${i + 1} ${pos[i].n} แตะเพื่อเปิด`;
+      const label = state.open[i] ? `${pos[i].n}: ${nm(card)}${c.rev ? " กลับหัว" : ""}` : `ตำแหน่ง ${i + 1} ${pos[i].n} แตะเพื่อเปิด`;
       const plus = (k) => state.cards[k].clar.length ? ` <span class="plus">+${state.cards[k].clar.length}</span>` : "";
       return `<div class="cell${animate ? " deal" : ""}" style="${area}${delay}">
-        <button type="button" class="slot${c.rev ? " reversed" : ""}${cross ? " cross" : ""}${state.open[i] ? " open" : ""}" data-i="${i}" aria-label="${esc(label)}">
-          <div class="card"><div class="back"></div>${faceHTML(card)}</div>
+        <button type="button" class="slot${c.rev ? (deck === "hindu" ? " rvmark" : " reversed") : ""}${cross ? " cross" : ""}${state.open[i] ? " open" : ""}" data-i="${i}" aria-label="${esc(label)}">
+          <div class="card"><div class="back"></div>${faceHTML(card, c.rev)}</div>
         </button>
         ${cross ? "" : `<div class="pos"><b>${i + 1}</b> ${pos[i].n}${plus(i)}${state.n === 10 && i === 0 ? ` / <b>2</b> อุปสรรค${plus(1)}` : ""}</div>`}
       </div>`;
@@ -532,7 +716,7 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
     const slot = document.querySelector(`.slot[data-i="${i}"]`);
     slot.classList.add("open");
     const card = DECK[state.cards[i].id];
-    slot.setAttribute("aria-label", `${SPREADS[state.n][i].n}: ${card.en}${state.cards[i].rev ? " กลับหัว" : ""}`);
+    slot.setAttribute("aria-label", `${SPREADS[state.n][i].n}: ${nm(card)}${state.cards[i].rev ? " กลับหัว" : ""}`);
     updateHint();
     renderReading();
   }
@@ -599,11 +783,11 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
     const lens = TOPICS[topic].lens[card.arcana === "major" ? "major" : card.suit];
     const extra = card.arcana === "major" ? "ไพ่ใหญ่ (Major Arcana) น้ำหนักสูงกว่าไพ่ใบอื่นในการวาง"
       : card.rank >= 10 ? `ไพ่บุคคล: ${COURT[card.rank - 10]}`
-      : `เลข ${card.rank + 1} ในชุด${SUITS[card.suit].th} (ธาตุ${ELEMENT[card.suit]}): ${NUM_MEAN[card.rank]}`;
+      : `เลข ${card.rank + 1} ใน${deck === "hindu" ? H_SUIT[card.suit].th : "ชุด" + SUITS[card.suit].th} (ธาตุ${ELEMENT[card.suit]}): ${NUM_MEAN[card.rank]}`;
     const amb = isAmbiguous(c);
     const clar = c.clar.map((x) => {
       const k = DECK[x.id], mm = x.rev ? k.rv : k.up;
-      return `<li><span class="cn sm">${esc(k.en)}</span> <span class="th">${esc(k.th)}</span> <span class="tag ${x.rev ? "rv" : "up"}">${x.rev ? "กลับหัว" : "ตั้งตรง"}</span>
+      return `<li><span class="cn sm">${esc(nm(k))}</span> <span class="th">${esc(sub(k))}</span> <span class="tag ${x.rev ? "rv" : "up"}">${x.rev ? "กลับหัว" : "ตั้งตรง"}</span>
         <div class="kw${x.rev ? " r" : ""}">${mm[0]}</div><p>${mm[1]}</p></li>`;
     }).join("");
     const clarNote = c.clar.length ? (() => {
@@ -615,11 +799,12 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
     const canDraw = c.clar.length < MAX_CLAR && state.next < DECK.length;
     return `<article class="entry${c.rev ? " rv" : ""}" id="e${i}">
       <div class="posn">${i + 1} · ${pos.n} — ${pos.d}</div>
-      <div class="top"><span class="cn">${esc(card.en)}</span><span class="th">${esc(card.th)}</span>
+      <div class="top"><span class="cn">${esc(nm(card))}</span><span class="th">${esc(sub(card))}</span>
       <span class="tag ${c.rev ? "rv" : "up"}">${c.rev ? "กลับหัว" : "ตั้งตรง"}</span>
       ${amb ? '<span class="tag amb">กำกวม</span>' : ""}</div>
       <div class="kw">${m[0]}</div>
       <p>${m[1]}</p>
+      ${deck === "hindu" ? `<p class="myth"><b>ตำนาน:</b> ${H(card).myth}</p>` : ""}
       <p class="ctx"><b>ในเรื่อง${TOPICS[topic].th}:</b> ${lens}${c.rev ? " (กลับหัว: ด้านนี้ติดขัด ล่าช้า หรือแสดงออกมากหรือน้อยเกินไป)" : ""}</p>
       <p class="ctx">${extra}</p>
       ${amb ? `<p class="ctx amb-note">${AMBIG.has(c.id) && !c.clar.length ? "ไพ่ใบนี้ตีความได้หลายทางโดยธรรมชาติ" : "น้ำหนักของตำแหน่งนี้ยังก้ำกึ่ง"} แนะนำเปิดไพ่ขยายเพื่อดูว่าเอียงไปทางไหน</p>` : ""}
@@ -645,7 +830,7 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
     }[v.level];
     const key = KEY_POS[n], kc = cs[key];
     let why = `น้ำหนักรวมของไพ่ ${v.avg >= 0 ? "+" : ""}${v.avg.toFixed(2)} (ช่วง −2 ถึง +2)`;
-    if (n > 1) why += ` · ไพ่ตำแหน่ง "${pos[key].n}" คือ ${kc.en}${kc.rev ? " กลับหัว" : ""}`;
+    if (n > 1) why += ` · ไพ่ตำแหน่ง "${pos[key].n}" คือ ${nm(kc)}${kc.rev ? " กลับหัว" : ""}`;
     if (v.conflict) why += ` · ไพ่คำตอบขัดกับภาพรวม`;
     blocks.push(`<div class="verdict ${LV[1]}"><span class="vl">คำตอบ${state.q ? "ต่อคำถาม" : ""}</span><strong>${LV[0]}</strong><span class="why">${why}</span></div>`);
 
@@ -671,10 +856,10 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
       const top = Object.entries(counts).sort((a, b) => b[1] - a[1]);
       if (top.length && top[0][1] >= 2 && (top.length === 1 || top[0][1] > top[1][1])) {
         const s = SUITS[top[0][0]];
-        lines.push(`ชุด${s.th} (${s.en}, ธาตุ${s.el}) ออกมากที่สุด: เรื่องนี้หมุนรอบ${s.domain}${topic !== "general" && TOPICS[topic].lens[top[0][0]] ? ` ในเรื่อง${TOPICS[topic].th}หมายถึง${TOPICS[topic].lens[top[0][0]]}` : ""}`);
+        lines.push(`${suitTh(top[0][0])} ออกมากที่สุด: เรื่องนี้หมุนรอบ${s.domain}${topic !== "general" && TOPICS[topic].lens[top[0][0]] ? ` ในเรื่อง${TOPICS[topic].th}หมายถึง${TOPICS[topic].lens[top[0][0]]}` : ""}`);
       }
       const missing = Object.keys(SUITS).filter((k) => !counts[k]);
-      if (n >= 10 && missing.length) lines.push(`ไม่มีชุด${missing.map((k) => SUITS[k].th).join(" ")}: ด้าน${missing.map((k) => SUITS[k].domain.split(" ")[0]).join(" ")}ยังไม่ใช่ประเด็นหลัก หรือเป็นด้านที่ถูกมองข้าม`);
+      if (n >= 10 && missing.length) lines.push(`ไม่มี${missing.map((k) => deck === "hindu" ? H_SUIT[k].th : "ชุด" + SUITS[k].th).join(" ")}: ด้าน${missing.map((k) => SUITS[k].domain.split(" ")[0]).join(" ")}ยังไม่ใช่ประเด็นหลัก หรือเป็นด้านที่ถูกมองข้าม`);
       lines.push(revs === 0 ? "ไม่มีไพ่กลับหัว: พลังงานไหลลื่น สิ่งต่าง ๆ แสดงออกตรงไปตรงมา"
         : revs / n > .5 ? `ไพ่กลับหัว ${revs} ใบ เกินครึ่ง: มีความติดขัด ล่าช้า หรือต้องแก้จากข้างในก่อน`
         : `ไพ่กลับหัว ${revs} ใบ: มีบางจุดที่ติดขัดหรือต้องระวัง`);
@@ -683,7 +868,7 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
       cs.forEach((c) => { if (c.suit && c.rank < 10) ranks[c.rank] = (ranks[c.rank] || 0) + 1; });
       Object.entries(ranks).filter(([, k]) => k >= 2).forEach(([r, k]) => lines.push(`เลข ${+r + 1} ออก ${k} ใบ: ${REPEAT_NUM[r]}`));
       const courts = cs.filter((c) => c.suit && c.rank >= 10);
-      if (courts.length) lines.push(`ไพ่บุคคล ${courts.length} ใบ (${courts.map((c) => c.en).join(", ")}): มีคนอื่นเข้ามามีบทบาทในเรื่องนี้ หรือเป็นบุคลิกที่คุณต้องใช้`);
+      if (courts.length) lines.push(`ไพ่บุคคล ${courts.length} ใบ (${courts.map((c) => nm(c)).join(", ")}): มีคนอื่นเข้ามามีบทบาทในเรื่องนี้ หรือเป็นบุคลิกที่คุณต้องใช้`);
     } else {
       lines.push(cs[0].rev ? "ไพ่ออกกลับหัว: พลังของไพ่ใบนี้ถูกปิดกั้น ล่าช้า หรือแสดงออกในทางตรงข้าม ให้ดูว่าอะไรในตัวคุณหรือสถานการณ์ที่ยังติดขัด" : "ไพ่ออกตั้งตรง: พลังของไพ่ใบนี้แสดงออกได้เต็มที่");
     }
@@ -714,8 +899,8 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
     const best = idx.reduce((a, b) => cs[b].s > cs[a].s ? b : a), worst = idx.reduce((a, b) => cs[b].s < cs[a].s ? b : a);
     if (kc.s >= .3) adv.push(`ไพ่ "${pos[key].n}" สนับสนุน: เดินหน้าด้วย${kw2(kc, kc.rev)}`);
     else adv.push(`ไพ่ "${pos[key].n}" ชี้ไปที่${kw2(kc, kc.rev)}: ถ้าไม่อยากให้ออกมาแบบนี้ ${n > 1 && worst !== key ? `ให้แก้ที่ตำแหน่ง ${worst + 1} ${pos[worst].n} (${kw2(cs[worst], cs[worst].rev)}) ก่อน` : "ให้ทบทวนวิธีการก่อนตัดสินใจ"}`);
-    if (n > 1 && best !== key && cs[best].s > .3) adv.push(`จุดแข็งที่ใช้ได้: ตำแหน่ง ${best + 1} ${pos[best].n} (${cs[best].en}) ${kw2(cs[best], cs[best].rev)}`);
-    if (n > 1 && worst !== key && cs[worst].s < -.3) adv.push(`จุดที่ต้องระวัง: ตำแหน่ง ${worst + 1} ${pos[worst].n} (${cs[worst].en}) ${kw2(cs[worst], cs[worst].rev)}`);
+    if (n > 1 && best !== key && cs[best].s > .3) adv.push(`จุดแข็งที่ใช้ได้: ตำแหน่ง ${best + 1} ${pos[best].n} (${nm(cs[best])}) ${kw2(cs[best], cs[best].rev)}`);
+    if (n > 1 && worst !== key && cs[worst].s < -.3) adv.push(`จุดที่ต้องระวัง: ตำแหน่ง ${worst + 1} ${pos[worst].n} (${nm(cs[worst])}) ${kw2(cs[worst], cs[worst].rev)}`);
     if (topic === "health") adv.push("เรื่องสุขภาพ ไพ่ใช้ทบทวนตัวเองได้ แต่ไม่ใช่การวินิจฉัย ควรปรึกษาแพทย์");
     if (topic === "money") adv.push("การตัดสินใจทางการเงินควรอิงตัวเลขและข้อมูลจริงเป็นหลัก ใช้ไพ่ประกอบเท่านั้น");
     blocks.push(`<div class="advice"><h2>คำแนะนำ</h2><ul>${adv.map((a) => `<li>${a}</li>`).join("")}</ul></div>`);
@@ -724,12 +909,12 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
 
   function readingText() {
     const pos = SPREADS[state.n];
-    const out = [state.q ? `คำถาม: ${state.q}` : "การเปิดไพ่ทาโรต์", `หมวด: ${TOPICS[topicOf()].th} · ${SPREAD_NAME[state.n]}`];
+    const out = [state.q ? `คำถาม: ${state.q}` : "การเปิดไพ่ทาโรต์", deck === "hindu" ? "สำรับ: Hindu God Tarot" : "สำรับ: Rider–Waite", `หมวด: ${TOPICS[topicOf()].th} · ${SPREAD_NAME[state.n]}`];
     state.cards.forEach((c, i) => {
       const card = DECK[c.id];
       const m = c.rev ? card.rv : card.up;
-      out.push(`${i + 1}. ${pos[i].n}: ${card.en} (${card.th})${c.rev ? " กลับหัว" : ""}\n   ${m[0]}\n   ${m[1]}`);
-      c.clar.forEach((x) => { const k = DECK[x.id]; out.push(`   + ไพ่ขยาย: ${k.en}${x.rev ? " กลับหัว" : ""} — ${(x.rev ? k.rv : k.up)[0]}`); });
+      out.push(`${i + 1}. ${pos[i].n}: ${nm(card)} (${sub(card)})${c.rev ? " กลับหัว" : ""}\n   ${m[0]}\n   ${m[1]}`);
+      c.clar.forEach((x) => { const k = DECK[x.id]; out.push(`   + ไพ่ขยาย: ${nm(k)}${x.rev ? " กลับหัว" : ""} — ${(x.rev ? k.rv : k.up)[0]}`); });
     });
     const v = verdict();
     out.push(`แนวโน้มคำตอบ: ${{ strongYes: "บวกชัดเจน", yes: "เอนไปทางบวก", unclear: "ยังไม่ชัด", no: "เอนไปทางลบ", strongNo: "ลบชัดเจน" }[v.level]}`);
@@ -786,7 +971,8 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
     const cardLine = (x) => {
       const k = DECK[x.id], m = x.rev ? k.rv : k.up;
       const kind = k.arcana === "major" ? `Major Arcana ${k.num}` : `ชุด ${SUITS[k.suit].en} ธาตุ${ELEMENT[k.suit]}`;
-      return `${k.en} (${k.th}) — ${x.rev ? "กลับหัว" : "ตั้งตรง"} — ${kind} — คำสำคัญ: ${m[0]}`;
+      const hd = deck === "hindu" ? ` — ในสำรับเทพฮินดูแทนด้วย "${H(k).th}": ${H(k).myth}` : "";
+      return `${k.en} (${k.th}) — ${x.rev ? "กลับหัว" : "ตั้งตรง"} — ${kind} — คำสำคัญ: ${m[0]}${hd}`;
     };
     const cards = state.cards.map((c, i) =>
       `${i + 1}. ตำแหน่ง "${pos[i].n}" (${pos[i].d}): ${cardLine(c)}` +
@@ -797,6 +983,7 @@ details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
 คำถาม: ${state.q || "(ไม่ได้ระบุคำถาม ให้อ่านภาพรวมชีวิตช่วงนี้)"}
 หมวดคำถาม: ${TOPICS[topic].th}
 รูปแบบการวาง: ${SPREAD_NAME[state.n]}
+สำรับ: ${deck === "hindu" ? "Hindu God Tarot (โครงสร้าง Rider–Waite 78 ใบ แต่ละใบจับคู่กับเทพหรือตำนานฮินดู) ให้ใช้ตำนานของแต่ละใบช่วยอธิบายอย่างให้เกียรติต่อศาสนาฮินดู" : "Rider–Waite"}
 ไพ่ที่เปิดได้:
 ${cards}
 
@@ -930,11 +1117,11 @@ CLARITY: ชัดเจน หรือ กำกวม; CLARIFY: เลขต�
   function renderHistory() {
     const h = store.get("tarot.history", []);
     const fmt = new Intl.DateTimeFormat("th-TH", { dateStyle: "medium", timeStyle: "short" });
-    const nm = ([id, rv]) => DECK[id] ? esc(DECK[id].en) + (rv ? " (กลับหัว)" : "") : "";
+    const hn = ([id, rv]) => DECK[id] ? esc(nm(DECK[id])) + (rv ? " (กลับหัว)" : "") : "";
     $("#hist").innerHTML = h.length ? h.map((r) => `<li>
       <time>${fmt.format(new Date(r.t))} · ${r.n} ใบ</time>
       ${r.q ? `<span>${esc(r.q)}</span>` : ""}
-      <span class="muted">${r.c.map((c) => nm(c) + ((c[2] || []).length ? ` [+ ${c[2].map(nm).join(", ")}]` : "")).join(" · ")}</span>
+      <span class="muted">${r.c.map((c) => hn(c) + ((c[2] || []).length ? ` [+ ${c[2].map(hn).join(", ")}]` : "")).join(" · ")}</span>
     </li>`).join("") : `<li class="note">ยังไม่มีประวัติ</li>`;
   }
 
@@ -942,6 +1129,11 @@ CLARITY: ชัดเจน หรือ กำกวม; CLARIFY: เลขต�
   $("#spreadSel").addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b) return;
     spreadN = +b.dataset.n; store.set("tarot.spread", spreadN); deal(true);
+  });
+  $("#deckSel").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b || b.dataset.d === deck) return;
+    deck = b.dataset.d; store.set("tarot.deck", deck); syncButtons();
+    if (state) { aiReset(); renderSpread(false); renderReading(); renderHistory(); }
   });
   $("#topicSel").addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b) return;
@@ -976,6 +1168,9 @@ CLARITY: ชัดเจน หรือ กำกวม; CLARIFY: เลขต�
     state.cards.forEach((_, i) => setTimeout(() => open(i), i * 120));
   });
 
+  const metaDeck = document.querySelector('meta[name="tarot-deck"]');
+  deck = location.hash === "#hindu" ? "hindu" : location.hash === "#rws" ? "rws" : store.get("tarot.deck", metaDeck ? metaDeck.content : "rws");
+  if (deck !== "hindu") deck = "rws";
   syncButtons();
   renderHistory();
   deal(false);
