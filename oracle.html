@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="oracle.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ออราเคิลเทพ">
+<meta name="theme-color" content="#1f0d14">
+<!--ARTIFACT-START-->
+<title>Hindu Deity Oracle</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chonburi&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Noto+Serif+Devanagari:wght@500;700&family=Noto+Sans+Tamil:wght@600&display=swap">
+<style>
+/* Layout: one column "temple altar" — question and spread choice, the altar cloth with cards, then the written message. Single committed dark look: temple night, maroon, marigold gold, vermilion. */
+:root {
+  --bg: #1f0d14;
+  --felt: #2c121c;
+  --felt-edge: #4a1d2c;
+  --ink: #f3e6d2;
+  --muted: #c4a7a9;
+  --gold: #e6a93a;
+  --gold-soft: rgba(230, 169, 58, .2);
+  --vermilion: #ff7a59;
+  --line: rgba(243, 230, 210, .12);
+  --font-th-display: "Chonburi", "IBM Plex Sans Thai", serif;
+  --font-body: "IBM Plex Sans Thai", "Sukhumvit Set", "Thonburi", system-ui, sans-serif;
+  --font-deva: "Noto Serif Devanagari", "Kohinoor Devanagari", serif;
+  --font-tamil: "Noto Sans Tamil", "Tamil Sangam MN", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { background: var(--bg); color: var(--ink); }
+body {
+  font-family: var(--font-body); font-size: 16px; line-height: 1.6; margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+  -webkit-tap-highlight-color: transparent;
+}
+.wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: grid; gap: 4px; }
+h1 { font-family: var(--font-th-display); font-weight: 400; font-size: 1.75rem; line-height: 1.25; margin: 0; color: var(--gold); text-wrap: balance; }
+h1 .om { font-family: var(--font-deva); margin-right: .25em; }
+.sub { color: var(--muted); font-size: .9rem; margin: 0; }
+.controls { display: grid; gap: 12px; }
+label.field { display: grid; gap: 6px; font-size: .85rem; color: var(--muted); }
+input[type="text"] { font: inherit; color: var(--ink); background: var(--felt); border: 1px solid var(--felt-edge); border-radius: 10px; padding: 10px 12px; width: 100%; }
+input[type="text"]:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg button { font: inherit; font-size: .9rem; color: var(--ink); background: transparent; border: 1px solid var(--felt-edge); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--gold-soft); border-color: var(--gold); color: var(--gold); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { font: inherit; font-weight: 600; border-radius: 10px; padding: 10px 18px; cursor: pointer; border: 1px solid var(--gold); background: var(--gold); color: var(--bg); }
+.btn.ghost { background: transparent; color: var(--gold); }
+.btn.small { font-size: .85rem; padding: 6px 12px; border-radius: 8px; }
+.btn:disabled { opacity: .4; cursor: default; }
+
+.altar { background: radial-gradient(120% 90% at 50% 0%, var(--felt-edge), var(--felt) 60%); border: 1px solid var(--felt-edge); border-radius: 18px; padding: 20px 12px; display: grid; gap: 12px; }
+.hint { text-align: center; color: var(--muted); font-size: .85rem; margin: 0; min-height: 1.4em; }
+.deck { display: flex; justify-content: center; }
+.deck .stack { width: 70px; aspect-ratio: 2 / 3; position: relative; }
+.deck .stack i { position: absolute; inset: 0; border-radius: 8px; border: 2px solid var(--gold); background: #5a1626; }
+.deck .stack i:nth-child(1) { transform: translate(-3px, 3px) rotate(-3deg); }
+.deck .stack i:nth-child(3) { transform: translate(3px, -2px) rotate(2deg); }
+.shuffling .stack i:nth-child(1) { animation: sh1 .25s ease-in-out 3 alternate; }
+.shuffling .stack i:nth-child(3) { animation: sh2 .25s ease-in-out 3 alternate; }
+@keyframes sh1 { to { transform: translateX(-26px) rotate(-8deg); } }
+@keyframes sh2 { to { transform: translateX(26px) rotate(8deg); } }
+
+.spread { display: grid; gap: 10px; justify-content: center; width: 100%; margin: 0 auto; }
+.spread.s1 { grid-template-columns: minmax(0, 1fr); max-width: 170px; }
+.spread.s3 { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 420px; }
+.spread.s5 { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 360px; grid-template-areas: ". p3 ." "p2 p5 p4" ". p1 ."; }
+.cell { display: grid; gap: 6px; justify-items: center; min-width: 0; }
+.deal { animation: deal .45s ease-out both; }
+@keyframes deal { from { opacity: 0; transform: translateY(-18px); } to { opacity: 1; transform: none; } }
+.pos { font-size: .72rem; color: var(--muted); text-align: center; line-height: 1.3; }
+.pos b { color: var(--gold); font-weight: 600; }
+.plus { color: var(--vermilion); font-weight: 600; }
+.slot { width: 100%; aspect-ratio: 2 / 3; perspective: 800px; cursor: pointer; border: 0; padding: 0; background: none; }
+.card { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.3, .7, .3, 1); }
+.slot.open .card { transform: rotateY(180deg); }
+.face, .back { position: absolute; inset: 0; border-radius: 10px; backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: 0 6px 14px rgba(0,0,0,.4); }
+.back {
+  border: 2px solid var(--gold);
+  background:
+    radial-gradient(circle at 50% 50%, var(--gold) 0 6%, transparent 7% 20%, var(--gold-soft) 21% 23%, transparent 24%),
+    repeating-conic-gradient(from 0deg at 50% 50%, rgba(230,169,58,.22) 0 10deg, transparent 10deg 20deg),
+    #5a1626;
+}
+.face {
+  transform: rotateY(180deg); border: 2px solid var(--gold); color: #f6dfb0;
+  background: radial-gradient(120% 80% at 50% 38%, #a8322a, #5a1424 70%);
+  display: grid; grid-template-rows: auto 1fr auto; justify-items: center; align-items: center;
+  padding: 8% 6%; text-align: center; overflow: hidden;
+}
+.face .no { font-size: clamp(.55rem, 2.3vw, .78rem); color: #f2c46a; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+.face .emb { display: grid; place-items: center; width: 100%; color: #f2c46a; }
+.face .emb svg { width: 56%; height: auto; }
+.face .omg { font-family: var(--font-deva); font-size: clamp(1.4rem, 8vw, 2.8rem); line-height: 1; }
+.face .nm { display: grid; gap: 1px; line-height: 1.15; }
+.face .deva { font-family: var(--font-deva); font-weight: 700; color: #f2c46a; font-size: clamp(.55rem, 2.6vw, .9rem); }
+.face .deva.ta { font-family: var(--font-tamil); }
+.face .thn { font-weight: 600; font-size: clamp(.5rem, 2.2vw, .78rem); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.face .theme { font-size: clamp(.45rem, 1.9vw, .66rem); color: #e8c48c; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+.reading { display: grid; gap: 14px; }
+.reading h2, .ai h2 { font-family: var(--font-th-display); font-weight: 400; color: var(--gold); font-size: 1.2rem; margin: 0; }
+.qline { font-family: var(--font-body); font-size: .95rem; color: var(--ink); }
+.entry { display: grid; gap: 6px; padding-block: 12px; border-top: 1px solid var(--line); }
+.entry .posn { font-size: .78rem; color: var(--muted); }
+.entry .top { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.entry .cn { font-family: var(--font-th-display); font-weight: 400; font-size: 1.15rem; color: var(--gold); }
+.entry .dv { font-family: var(--font-deva); color: var(--muted); }
+.entry .dv.ta { font-family: var(--font-tamil); }
+.entry .theme { font-weight: 600; }
+.entry .kw { font-size: .85rem; color: var(--gold); }
+.entry p { margin: 0; max-width: 65ch; }
+.entry .do, .entry .warn { font-size: .92rem; }
+.entry .do b { color: #9fcf9a; }
+.entry .warn b { color: var(--vermilion); }
+.mantra { display: grid; gap: 2px; border-left: 2px solid var(--gold); padding-left: 10px; }
+.mantra .m { font-family: var(--font-deva); font-size: 1.05rem; color: var(--gold); }
+.mantra .m.ta { font-family: var(--font-tamil); }
+.mantra .t { font-size: .85rem; color: var(--muted); }
+.clar { list-style: none; margin: 4px 0 0; padding: 0 0 0 12px; border-left: 2px solid var(--gold-soft); display: grid; gap: 8px; }
+.clar li { display: grid; gap: 2px; }
+.summary { background: var(--felt); border: 1px solid var(--felt-edge); border-radius: 12px; padding: 14px 16px; display: grid; gap: 6px; }
+.summary p { margin: 0; }
+.summary ul, .ai-out ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.note { color: var(--muted); font-size: .8rem; margin: 0; }
+.ai { display: grid; gap: 12px; border-top: 1px solid var(--line); padding-top: 16px; }
+.ai-out { display: grid; gap: 10px; max-width: 65ch; }
+.ai-out:empty { display: none; }
+.ai-out h3 { font-family: var(--font-th-display); font-weight: 400; color: var(--gold); font-size: 1.05rem; margin: 8px 0 0; }
+.ai-out h4 { font-size: .95rem; margin: 4px 0 0; }
+.ai-out p { margin: 0; }
+.thinking { color: var(--muted); margin: 0; animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .45; } }
+.err { color: var(--vermilion); margin: 0; }
+.clarity { border: 1px dashed var(--gold); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
+.clarity p { margin: 0; }
+details.hist { border-top: 1px solid var(--line); padding-top: 12px; }
+details.hist summary { cursor: pointer; color: var(--gold); font-weight: 600; }
+.hist ol { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
+.hist li { font-size: .85rem; display: grid; gap: 2px; }
+.hist time { color: var(--muted); font-size: .75rem; font-variant-numeric: tabular-nums; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--gold); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-weight: 600; font-size: .9rem; z-index: 20; }
+@media (prefers-reduced-motion: reduce) {
+  .card { transition: none; }
+  .deal, .shuffling .stack i, .thinking { animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="om">ॐ</span>ไพ่ออราเคิลเทพฮินดู</h1>
+    <p class="sub">44 ใบ · สาส์นจากเทพ เทวี อวตาร นพเคราะห์ และฤๅษี · ไม่อิงความหมายไพ่ทาโรต์ และไม่มีไพ่กลับหัว</p>
+  </header>
+
+  <section class="controls" aria-label="ตั้งค่าการเปิดไพ่">
+    <label class="field" for="q">คำถามหรือเรื่องที่อยากขอคำแนะนำ (ไม่บังคับ)
+      <input type="text" id="q" maxlength="140" placeholder="เช่น ช่วงนี้ควรวางตัวกับงานใหม่อย่างไร">
+    </label>
+    <div class="seg" role="group" aria-label="รูปแบบการเปิดไพ่" id="spreadSel">
+      <button type="button" data-n="1">1 ใบ · สาส์นจากเทพ</button>
+      <button type="button" data-n="3" aria-pressed="true">3 ใบ · เป็นอยู่ / ควรทำ / คลี่คลาย</button>
+      <button type="button" data-n="5">5 ใบ · ปัญจภูต</button>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn" id="shuffle">สับไพ่และวาง</button>
+      <button type="button" class="btn ghost" id="revealAll">เปิดทั้งหมด</button>
+    </div>
+  </section>
+
+  <section class="altar" aria-label="แท่นวางไพ่">
+    <div class="deck" id="deck"><div class="stack"><i></i><i></i><i></i></div></div>
+    <p class="hint" id="hint"></p>
+    <div class="spread s3" id="spread"></div>
+  </section>
+
+  <section class="reading" id="reading"></section>
+  <section class="ai" id="ai" aria-live="polite" hidden></section>
+
+  <details class="hist">
+    <summary>ประวัติการเปิดไพ่ (เก็บในเครื่องนี้เท่านั้น)</summary>
+    <ol id="hist"></ol>
+  </details>
+
+  <p class="note">ไพ่ชุดนี้ใช้เพื่อทบทวนตัวเองและความบันเทิง ไม่ใช่คำสอนทางศาสนาฮินดูโดยตรง ไม่ควรใช้แทนการตัดสินใจเรื่องเงิน สุขภาพ หรือกฎหมาย ความหมายของไพ่ผู้พัฒนาเขียนขึ้นเองจากตำนาน บทสวดเป็นแบบนมัสการพื้นฐาน การสุ่มใช้ crypto.getRandomValues ของเครื่อง</p>
+</div>
+
+<script>
+(() => {
+  // [ชื่อไทย, ชื่อต้นฉบับ, สัญลักษณ์, สาย, หัวข้อสาส์น, คำสำคัญ, สาส์น, ควรทำ, ควรระวัง, บทสวด, คำอ่านบทสวด]
+  const CARDS = [
+    ["พระพิฆเนศ", "गणेश", "om", "shiva", "เริ่มต้นใหม่ ทางเปิด", "การเริ่มต้น · ขจัดอุปสรรค · ปัญญา", "อุปสรรคที่เห็นอยู่ไม่ได้มาเพื่อหยุดคุณ แต่มาเพื่อให้เลือกทางที่ฉลาดกว่า ก่อนเริ่มสิ่งใหม่ให้ตั้งใจให้ชัดและเคารพทุกขั้นตอน ทางจะค่อย ๆ เปิด", "เริ่มจากก้าวเล็กที่ทำได้วันนี้ และจัดการเรื่องค้างที่ขวางทางก่อน", "อย่าข้ามขั้นตอนหรือรีบจนมองข้ามรายละเอียด", "ॐ गं गणपतये नमः", "โอม กัม คะณะปะตะเย นะมะห์"],
+    ["พระศิวะ", "शिव", "trishula", "shiva", "ปล่อยวางเพื่อเปลี่ยนแปลง", "การปล่อยวาง · สมาธิ · การเปลี่ยนผ่าน", "สิ่งที่ถึงเวลาต้องจบ ให้ปล่อยให้จบ พระศิวะทำลายเพื่อให้สิ่งใหม่เกิด ความนิ่งภายในจะทำให้คุณเห็นว่าอะไรควรเก็บและอะไรควรวาง", "หาเวลาเงียบวันละ 10 นาที แล้วเขียนว่าสิ่งใดที่คุณยื้อไว้โดยไม่จำเป็น", "การปล่อยวางไม่ใช่การหนีปัญหา อย่าตัดทุกอย่างทิ้งด้วยอารมณ์", "ॐ नमः शिवाय", "โอม นะมะห์ ศิวายะ"],
+    ["พระวิษณุ", "विष्णु", "chakra", "vishnu", "รักษาสิ่งดีไว้", "ความมั่นคง · การคุ้มครอง · ธรรมะ", "ตอนนี้ไม่ใช่เวลารื้อทุกอย่าง แต่เป็นเวลาดูแลสิ่งดีที่มีอยู่ให้มั่นคง เมื่อธรรมะเสื่อมพระวิษณุลงมาแก้ไข คุณก็ทำหน้าที่นั้นได้ทั้งในบ้านและในงาน", "ทบทวนระบบ ความสัมพันธ์ หรือทรัพย์สินที่ต้องการการดูแล แล้วซ่อมก่อนจะพัง", "อย่าใช้คำว่าความมั่นคงเป็นข้ออ้างเพื่อไม่เปลี่ยนแปลง", "ॐ नमो नारायणाय", "โอม นะโม นารายะณายะ"],
+    ["พระพรหม", "ब्रह्मा", "lotus", "deva", "สร้างสรรค์สิ่งใหม่", "ความคิดสร้างสรรค์ · การวางรากฐาน · วิสัยทัศน์", "ความคิดในหัวพร้อมเกิดเป็นรูปร่างแล้ว พระพรหมสร้างโลกจากดอกบัวที่ผุดจากนาภีพระวิษณุ สิ่งใหม่ของคุณก็ต้องอาศัยรากฐานที่มั่นคง", "ร่างแผนเป็นลายลักษณ์อักษร และแบ่งเป็นขั้นที่ทำได้จริง", "ระวังความหยิ่งในสิ่งที่ตัวเองสร้าง ตำนานเล่าว่าพระพรหมเสียเศียรหนึ่งไปเพราะอัตตา", "ॐ ब्रह्मणे नमः", "โอม พรัหมะเณ นะมะห์"],
+    ["พระแม่ลักษมี", "लक्ष्मी", "lotus", "shakti", "ความอุดมสมบูรณ์", "ความมั่งคั่ง · ความงาม · ความเอื้อเฟื้อ", "ความอุดมสมบูรณ์กำลังไหลเข้ามา ทั้งในรูปเงิน โอกาส และความสัมพันธ์ พระแม่ลักษมีอยู่กับผู้ที่ขยัน สะอาด และให้ผู้อื่นเป็น", "จัดบ้านหรือโต๊ะทำงานให้สะอาดเป็นระเบียบ และวางแผนการเงินให้ชัด", "ตำนานเล่าว่าพระแม่ลักษมีไม่อยู่นิ่งที่ใดนาน อย่าใช้จ่ายเกินตัวเพราะคิดว่าเงินจะมาอีก", "ॐ श्रीं महालक्ष्म्यै नमः", "โอม ศรีม มะหาลักษมไย นะมะห์"],
+    ["พระแม่สรัสวดี", "सरस्वती", "veena", "shakti", "ปัญญาและการเรียนรู้", "ความรู้ · การสื่อสาร · ศิลปะ", "คำตอบที่คุณหาอยู่ได้มาจากการเรียนรู้ ไม่ใช่การเดา ถึงเวลาศึกษา ฝึกฝน หรือสื่อสารให้ชัดเจนขึ้น", "อ่าน เรียน หรือปรึกษาผู้รู้ในเรื่องที่ค้างใจก่อนตัดสินใจ", "ความรู้ที่ไม่นำมาใช้ หรือการพูดมากเกินจำเป็น", "ॐ ऐं सरस्वत्यै नमः", "โอม ไอม สะรัสวัตไย นะมะห์"],
+    ["พระแม่ปารวตี", "पार्वती", "lotus", "shakti", "ความรักที่อดทน", "ความผูกพัน · ความอดทน · ครอบครัว", "พระแม่ปารวตีบำเพ็ญตบะยาวนานจนพระศิวะยอมรับ ความรักและความสัมพันธ์ที่มั่นคงต้องใช้ความอดทนและความจริงใจ ไม่ใช่การเร่ง", "แสดงความใส่ใจกับคนในครอบครัวหรือคนรักอย่างสม่ำเสมอ", "อย่าเสียสละจนลืมคุณค่าของตัวเอง", "ॐ पार्वत्यै नमः", "โอม ปารวัตไย นะมะห์"],
+    ["พระแม่ทุรคา", "दुर्गा", "trishula", "shakti", "ความกล้าและการปกป้อง", "ความกล้า · การคุ้มครอง · ขอบเขต", "ถึงเวลายืนหยัดเพื่อตัวเองหรือคนที่คุณรัก พระแม่ทุรคาปราบอสูรที่เทพองค์อื่นปราบไม่ได้ด้วยพลังที่สงบ ไม่ใช่ความโกรธ", "กำหนดขอบเขตให้ชัดกับคนหรือสถานการณ์ที่เอาเปรียบคุณ", "ความกล้าที่ไม่มีสติจะกลายเป็นความก้าวร้าว", "ॐ दुं दुर्गायै नमः", "โอม ทุม ทุรคายไย นะมะห์"],
+    ["พระแม่กาลี", "काली", "khadga", "shakti", "ตัดสิ่งที่ไม่จำเป็น", "ความจริง · การตัดขาด · การปลดปล่อย", "พระแม่กาลีตัดอัตตาและภาพลวงตาโดยไม่ลังเล บางอย่างในชีวิตคุณต้องตัดออก ไม่ว่าจะเป็นนิสัย ความสัมพันธ์ หรือความกลัว ความจริงที่เจ็บจะปลดปล่อยคุณ", "ระบุหนึ่งสิ่งที่ดูดพลังคุณมากที่สุด แล้วตัดสินใจจัดการ", "อย่าทำลายทุกอย่างในคราวเดียวเพราะความโกรธ", "ॐ क्रीं कालिकायै नमः", "โอม กรีม กาลิกายไย นะมะห์"],
+    ["หนุมาน", "हनुमान", "gada", "vishnu", "พลังจากความภักดี", "ความภักดี · กำลัง · การรับใช้", "หนุมานลืมพลังของตัวเองจนมีผู้มาเตือน คุณมีความสามารถมากกว่าที่คิด และพลังนั้นจะออกมาเต็มที่เมื่อทำเพื่อเป้าหมายที่ใหญ่กว่าตัวเอง", "รับงานที่ท้าทายและทำเต็มที่โดยไม่ต้องรอคำชม", "ระวังการทุ่มเทให้คนหรือองค์กรที่ไม่คู่ควรกับความภักดีของคุณ", "ॐ हं हनुमते नमः", "โอม หัม หะนุมะเต นะมะห์"],
+    ["พระราม", "राम", "bow", "vishnu", "ทำตามหน้าที่อย่างซื่อตรง", "ธรรมะ · หน้าที่ · ความซื่อตรง", "พระรามยอมเดินดงสิบสี่ปีเพื่อรักษาคำพูดของพระบิดา ทางที่ถูกอาจไม่ใช่ทางที่ง่าย แต่จะทำให้คุณยืนตรงได้ในระยะยาว", "ทำตามที่สัญญาไว้ และเลือกทางที่คุณอธิบายได้โดยไม่ต้องละอาย", "หน้าที่ที่ยึดแข็งเกินไปอาจทำร้ายคนใกล้ตัว เหมือนที่นางสีดาต้องรับผล", "श्री राम जय राम जय जय राम", "ศรีราม ชะยะราม ชะยะ ชะยะราม"],
+    ["พระแม่สีดา", "सीता", "lotus", "shakti", "ความเข้มแข็งที่เงียบ", "ความอดทน · ศักดิ์ศรี · ความบริสุทธิ์ใจ", "นางสีดาผ่านทั้งการถูกลักพาและการถูกสงสัย แต่ไม่เคยเสียศักดิ์ศรีของตัวเอง ความเข้มแข็งไม่จำเป็นต้องดัง", "ยืนยันคุณค่าของตัวเองอย่างสงบ ไม่ต้องพิสูจน์กับทุกคน", "ความอดทนต้องมีขีดจำกัด อย่ายอมทนกับสิ่งที่ทำร้ายคุณ", "ॐ सीतायै नमः", "โอม สีตายไย นะมะห์"],
+    ["พระกฤษณะ", "कृष्ण", "flute", "vishnu", "ใช้ชีวิตอย่างเบาใจและฉลาด", "ความรัก · ความสนุก · กลยุทธ์", "พระกฤษณะเป็นทั้งเด็กเลี้ยงวัวที่เป่าขลุ่ยและนักวางแผนในสงคราม ชีวิตต้องการทั้งความเบาใจและความฉลาด อย่าจริงจังจนลืมความสุข", "มองปัญหาจากมุมใหม่ บางครั้งทางออกที่ดีที่สุดมาจากความยืดหยุ่น", "กลยุทธ์ที่ไม่มีธรรมะกำกับจะกลายเป็นการหลอกลวง", "ॐ नमो भगवते वासुदेवाय", "โอม นะโม ภะคะวะเต วาสุเทวายะ"],
+    ["พระแม่ราธา", "राधा", "flute", "vishnu", "รักอย่างอุทิศ", "ความรัก · ความศรัทธา · การอุทิศตน", "ความรักของราธาไม่ได้วัดจากการครอบครอง แต่จากความผูกพันในใจ ความรักที่แท้ให้โดยไม่ต่อรอง", "บอกความรู้สึกอย่างจริงใจโดยไม่คาดหวังผลตอบแทนทันที", "ความรักที่ไม่มีขอบเขตอาจกลายเป็นการรอคอยที่ไม่สิ้นสุด", "ॐ राधायै नमः", "โอม ราธายไย นะมะห์"],
+    ["พระขันธกุมาร (มุรุกัน)", "कार्तिकेय", "vel", "shiva", "ลงมือด้วยความกล้า", "ความกล้า · ชัยชนะ · ความเยาว์", "แม่ทัพหนุ่มแห่งเทวดาขี่นกยูงพร้อมหอกเวล เป็นเวลาที่ต้องลงมือ ไม่ใช่แค่คิด อุปสรรคจะยอมแพ้ต่อความตั้งใจที่ชัดเจน", "เลือกเป้าหมายหนึ่งอย่างแล้วลงมือภายในสัปดาห์นี้", "ความรีบร้อนแบบวัยหนุ่มอาจทำให้มองข้ามคำแนะนำ", "ॐ शरवणभवाय नमः", "โอม ศะระวะณะภะวายะ นะมะห์"],
+    ["พระสุริยะ", "सूर्य", "sun", "graha", "พลังชีวิตและความชัดเจน", "สุขภาพ · ความชัดเจน · ชื่อเสียง", "แสงอาทิตย์ไม่เลือกที่ส่อง ตอนนี้สิ่งต่าง ๆ จะชัดขึ้น และพลังกายใจของคุณกำลังกลับมา", "ตื่นเช้า รับแสงแดด และดูแลร่างกายให้สม่ำเสมอ", "แสงที่แรงเกินไปทำให้คนรอบข้างร้อน ระวังความถือตัว", "ॐ सूर्याय नमः", "โอม สูรยายะ นะมะห์"],
+    ["พระจันทร์", "चन्द्र", "moon", "graha", "ฟังอารมณ์และพักใจ", "อารมณ์ · วงจร · การพักผ่อน", "พระจันทร์มีข้างขึ้นข้างแรม อารมณ์ของคุณก็เช่นกัน อย่าตัดสินใจเรื่องใหญ่ตอนที่ใจยังขึ้นลง ให้เวลาอารมณ์ได้คลี่คลาย", "นอนให้พอ และจดว่าอะไรทำให้ใจขึ้นหรือลง", "อย่าตัดสินใจจากความรู้สึกชั่วขณะ", "ॐ चन्द्राय नमः", "โอม จันทรายะ นะมะห์"],
+    ["พระแม่คงคา", "गंगा", "wave", "shakti", "ชำระล้างและให้อภัย", "การให้อภัย · การชำระล้าง · การเริ่มใหม่", "น้ำของพระแม่คงคาชำระบาปของผู้ศรัทธา ถึงเวลาวางความผิดเก่าทั้งของตัวเองและของคนอื่น เพื่อให้ใจไหลได้อีกครั้ง", "ให้อภัยหนึ่งเรื่องที่ค้างในใจ หรือขอโทษในเรื่องที่คุณทำผิด", "การให้อภัยไม่ได้แปลว่าต้องกลับไปอยู่ในสถานการณ์เดิม", "ॐ गङ्गायै नमः", "โอม คังคายไย นะมะห์"],
+    ["พระอัคนี", "अग्नि", "flame", "deva", "ไฟแห่งความตั้งใจ", "ความตั้งใจ · การเปลี่ยนแปลง · พิธีกรรม", "ไฟเปลี่ยนสิ่งที่ถวายให้กลายเป็นสิ่งศักดิ์สิทธิ์ ความตั้งใจที่แรงพอจะเปลี่ยนความยากลำบากให้เป็นประสบการณ์", "ตั้งปณิธานให้ชัดหนึ่งข้อ และทำต่อเนื่องเหมือนการจุดไฟบูชาทุกวัน", "ไฟที่ไม่ควบคุมเผาทุกอย่างรวมถึงตัวคุณ ระวังความโกรธ", "ॐ अग्नये नमः", "โอม อัคนะเย นะมะห์"],
+    ["พระวายุ", "वायु", "wind", "deva", "ยืดหยุ่นเหมือนลม", "การเคลื่อนไหว · ลมหายใจ · ความยืดหยุ่น", "ลมไม่ต่อสู้กับภูเขาแต่หาทางผ่าน การปรับตัวคือพลังของคุณตอนนี้ และลมหายใจคือเครื่องมือที่ง่ายที่สุดในการตั้งหลัก", "ฝึกหายใจช้า ๆ ลึก ๆ ทุกครั้งที่รู้สึกกดดัน", "ลมที่ไม่มีทิศทางกลายเป็นพายุ ระวังการเปลี่ยนใจบ่อยเกินไป", "ॐ वायवे नमः", "โอม วายะเว นะมะห์"],
+    ["พระวรุณ", "वरुण", "wave", "deva", "รักษาสัจจะ", "สัจจะ · ระเบียบ · ความลึก", "พระวรุณเฝ้าดูความซื่อตรงของมนุษย์ คำสัญญาที่คุณให้ไว้ทั้งกับคนอื่นและกับตัวเองกำลังถูกทดสอบ", "ทบทวนสัญญาและข้อตกลงที่มีอยู่ ทำให้ครบหรือเจรจาใหม่อย่างตรงไปตรงมา", "อย่าให้สัญญาที่รู้ว่ารักษาไม่ได้", "ॐ वरुणाय नमः", "โอม วะรุณายะ นะมะห์"],
+    ["พระอินทร์", "इन्द्र", "vajra", "deva", "ผู้นำที่ไม่หลงอำนาจ", "ภาวะผู้นำ · อำนาจ · ความรับผิดชอบ", "คุณอยู่ในตำแหน่งที่ต้องนำ พระอินทร์เป็นราชาแห่งเทวดาแต่หลายครั้งเสียบัลลังก์เพราะหลงอำนาจ ผู้นำที่ดีต้องฟังมากกว่าสั่ง", "ฟังความเห็นทีมก่อนตัดสินใจเรื่องสำคัญ", "อำนาจทำให้มองไม่เห็นข้อผิดพลาดของตัวเอง", "ॐ इन्द्राय नमः", "โอม อินทรายะ นะมะห์"],
+    ["ท้าวกุเวร", "कुबेर", "coin", "deva", "บริหารทรัพย์ให้งอกเงย", "การเงิน · การวางแผน · ความมั่นคง", "ท้าวกุเวรเป็นผู้ดูแลคลังสมบัติ ไม่ใช่ผู้ใช้จ่าย ความมั่งคั่งของคุณจะเติบโตจากการจัดการ ไม่ใช่จากโชค", "ทำบัญชีรายรับรายจ่าย และแยกเงินเก็บออกก่อนใช้", "ตำนานเล่าว่ากุเวรเคยอวดความร่ำรวยจนพระพิฆเนศสอนบทเรียน อย่าอวดทรัพย์", "ॐ कुबेराय नमः", "โอม กุเวรายะ นะมะห์"],
+    ["พระแม่อันนปูรณา", "अन्नपूर्णा", "kalasha", "shakti", "หล่อเลี้ยงตัวเองและผู้อื่น", "อาหาร · การดูแล · ความพอเพียง", "แม้พระศิวะยังต้องรับข้าวจากพระแม่อันนปูรณา ไม่มีใครอยู่ได้โดยไม่ได้รับการหล่อเลี้ยง ดูแลร่างกายและแบ่งปันสิ่งที่คุณมี", "กินอาหารให้ตรงเวลา และชวนคนสำคัญมากินข้าวด้วยกัน", "อย่าดูแลคนอื่นจนตัวเองหิว ทั้งทางกายและทางใจ", "ॐ अन्नपूर्णायै नमः", "โอม อันนะปูรณายไย นะมะห์"],
+    ["พระยม", "यम", "gada", "deva", "รับผิดชอบต่อการกระทำ", "กรรม · เวลา · ความรับผิดชอบ", "พระยมไม่ลำเอียง สิ่งที่คุณทำไว้กำลังส่งผลกลับมาทั้งดีและไม่ดี นี่คือเวลายอมรับและแก้ไข ไม่ใช่โทษคนอื่น", "ทบทวนเรื่องที่คุณยังไม่รับผิดชอบเต็มที่ แล้วจัดการให้จบ", "อย่าจมอยู่กับความรู้สึกผิดจนไม่ลงมือแก้", "ॐ यमाय नमः", "โอม ยะมายะ นะมะห์"],
+    ["พระศนิ (พระเสาร์)", "शनि", "bow", "graha", "บทเรียนที่ต้องอดทน", "วินัย · ความอดทน · บทเรียน", "พระเสาร์สอนช้าแต่ไม่ลืม ความล่าช้าตอนนี้ไม่ใช่การลงโทษ แต่เป็นการฝึกให้คุณแข็งแรงพอสำหรับสิ่งที่จะได้รับ", "ทำงานหนักอย่างสม่ำเสมอ และช่วยเหลือผู้ที่ลำบากกว่า", "อย่าใช้ทางลัด ทางลัดในช่วงนี้จะย้อนกลับมาเป็นภาระ", "ॐ शनैश्चराय नमः", "โอม ศะไนศจะรายะ นะมะห์"],
+    ["พระราหู", "राहु", "eclipse", "graha", "ระวังความหมกมุ่น", "ความปรารถนา · ภาพลวง · สิ่งที่ซ่อน", "พระราหูกลืนดวงอาทิตย์ได้เพียงชั่วคราว ความอยากหรือความหมกมุ่นบางอย่างกำลังบังสายตาคุณ แต่ก็เป็นแรงผลักให้ทำสิ่งที่ไม่เคยกล้าทำ", "ถามตัวเองว่าสิ่งที่อยากได้มากตอนนี้ คือสิ่งที่ใจต้องการจริงหรือไม่", "อย่าตัดสินใจเรื่องใหญ่ตอนที่ยังหลงใหลอยู่", "ॐ राहवे नमः", "โอม ราหะเว นะมะห์"],
+    ["นรสิงห์", "नृसिंह", "pillar", "vishnu", "ความคุ้มครองในยามวิกฤต", "การคุ้มครอง · ความกล้า · การมาทันเวลา", "พระวิษณุออกมาจากเสาหินเพื่อปกป้องประหลาดผู้ศรัทธา ในยามที่ดูเหมือนไม่มีทางออก ความช่วยเหลือจะมาจากที่ที่คุณคาดไม่ถึง", "ขอความช่วยเหลือจากคนที่ไว้ใจ อย่าแบกวิกฤตไว้คนเดียว", "อย่ายั่วยุหรือท้าทายผู้มีอำนาจโดยไม่จำเป็น", "ॐ नृसिंहाय नमः", "โอม นฤสิงหายะ นะมะห์"],
+    ["พญาครุฑ", "गरुड", "wing", "vishnu", "อิสรภาพและการเดินทาง", "อิสรภาพ · การเดินทาง · ความเร็ว", "พญาครุฑบินขึ้นสวรรค์นำน้ำอมฤตมาไถ่มารดาจากการเป็นทาส การเดินทางหรือการเปลี่ยนแปลงครั้งนี้มีเป้าหมายที่ใหญ่กว่าตัวคุณ", "วางแผนการเดินทางหรือการย้ายที่ที่คิดไว้ให้เป็นรูปธรรม", "ความเร็วไม่ใช่ทุกอย่าง ตรวจรายละเอียดก่อนออกเดินทาง", "ॐ गरुडाय नमः", "โอม คะรุฑายะ นะมะห์"],
+    ["โคนนทิ", "नन्दी", "trishula", "shiva", "ความภักดีและการรอคอย", "ความภักดี · ความสม่ำเสมอ · การรอคอย", "โคนนทินั่งรอหน้าเทวาลัยพระศิวะอย่างสงบ ผู้ศรัทธากระซิบคำขอที่หูของนนทิ สิ่งที่คุณรออยู่ต้องการความสม่ำเสมอมากกว่าความเร่งรีบ", "ทำสิ่งเดิมให้ดีขึ้นทุกวัน และอดทนรอผล", "การรอคอยที่ไม่มีการลงมือคือการเสียเวลา", "ॐ नन्दीश्वराय नमः", "โอม นันทีศวะรายะ นะมะห์"],
+    ["พระธันวันตรี", "धन्वन्तरि", "kalasha", "vishnu", "การเยียวยา", "สุขภาพ · การรักษา · การฟื้นฟู", "พระธันวันตรีผุดขึ้นจากเกษียรสมุทรพร้อมหม้ออมฤต เป็นบิดาแห่งอายุรเวท ร่างกายหรือใจของคุณต้องการการดูแลอย่างจริงจัง", "ไปตรวจสุขภาพที่เลื่อนไว้ และฟังสัญญาณจากร่างกาย", "ไพ่ใบนี้ไม่ใช่การวินิจฉัย อาการผิดปกติต้องพบแพทย์", "ॐ धन्वन्तरये नमः", "โอม ธันวันตะระเย นะมะห์"],
+    ["พระวิศวกรรม", "विश्वकर्मा", "parashu", "deva", "ฝีมือและการสร้าง", "ฝีมือ · งานช่าง · ความแม่นยำ", "สถาปนิกแห่งเทพสร้างทั้งนครทวารกาและอาวุธของเทวดา งานที่ทำด้วยมือและความเชี่ยวชาญของคุณคือสิ่งที่จะพาไปข้างหน้า", "ใส่ใจคุณภาพของงานทุกชิ้น ตรวจเครื่องมือและอุปกรณ์ให้พร้อม", "ความสมบูรณ์แบบเกินไปทำให้งานไม่เสร็จ", "ॐ विश्वकर्मणे नमः", "โอม วิศวะกรรมะเณ นะมะห์"],
+    ["ฤๅษีนารท", "नारद", "veena", "sage", "ข่าวสารกำลังมา", "ข่าวสาร · การสื่อสาร · ความอยากรู้", "ฤๅษีนารทท่องไปทั่วสามโลกพร้อมข่าวสารที่มักเป็นจุดเริ่มของเรื่องใหญ่ ข้อมูลใหม่หรือการสนทนาสำคัญกำลังจะเข้ามา", "ตั้งใจฟังมากกว่าพูด และตรวจสอบข่าวก่อนส่งต่อ", "คำพูดที่ส่งต่อโดยไม่คิดอาจจุดชนวนความขัดแย้ง", "ॐ नारदाय नमः", "โอม นาระทายะ นะมะห์"],
+    ["นาฏราช", "नटराज", "ring", "shiva", "จังหวะของชีวิต", "จังหวะ · การเปลี่ยนแปลง · ความสมดุล", "พระศิวะร่ายรำในวงไฟ เท้าข้างหนึ่งเหยียบอวิชชา ชีวิตมีทั้งการสร้างและการทำลายในจังหวะเดียว ความวุ่นวายตอนนี้เป็นส่วนหนึ่งของจังหวะ ไม่ใช่จุดจบ", "หากิจวัตรที่ทำให้คุณมั่นคงแม้รอบตัวจะเปลี่ยน", "อย่าพยายามควบคุมทุกการเปลี่ยนแปลง", "ॐ नटराजाय नमः", "โอม นะฏะราชายะ นะมะห์"],
+    ["อรรธนารีศวร", "अर्धनारीश्वर", "half", "shiva", "สมดุลภายใน", "สมดุล · การยอมรับตัวเอง · ความร่วมมือ", "พระศิวะกับพระแม่ปารวตีรวมเป็นกายเดียว ความแข็งกับความอ่อน เหตุผลกับความรู้สึก ต้องทำงานร่วมกัน ไม่ใช่แข่งกัน", "ถ้าใช้แต่เหตุผล ลองฟังความรู้สึก ถ้าใช้แต่ความรู้สึก ลองใช้เหตุผล", "อย่าปฏิเสธด้านใดด้านหนึ่งของตัวเอง", "ॐ अर्धनारीश्वराय नमः", "โอม อรรธะนารีศวะรายะ นะมะห์"],
+    ["ทักษิณามูรติ", "दक्षिणामूर्ति", "damaru", "shiva", "ครูในความเงียบ", "ความเงียบ · ครู · ปัญญาภายใน", "พระศิวะปางบรมครูสอนศิษย์ด้วยความเงียบใต้ต้นไทร คำตอบที่คุณหาไม่ได้มาจากเสียงรอบข้าง แต่มาจากการนิ่งพอจะได้ยินตัวเอง", "งดรับข้อมูลจากโซเชียลสักวัน แล้วถามตัวเองว่ารู้อะไรอยู่แล้ว", "ความเงียบที่ยาวเกินไปอาจกลายเป็นการหลีกหนี", "ॐ दक्षिणामूर्तये नमः", "โอม ทักษิณามูรตะเย นะมะห์"],
+    ["พระกามเทพ", "कामदेव", "bow", "deva", "ความรักและแรงดึงดูด", "ความรัก · ความปรารถนา · เสน่ห์", "กามเทพยิงศรดอกไม้ให้ความรักเกิดขึ้น แม้แต่พระศิวะที่บำเพ็ญตบะยังหวั่นไหว ความรู้สึกดี ๆ กำลังเกิดขึ้นทั้งต่อคนอื่นและต่อชีวิต", "เปิดใจรับความสัมพันธ์หรือความสุขเล็ก ๆ และดูแลตัวเองให้ดูดี", "กามเทพถูกเผาด้วยไฟจากตาที่สามของพระศิวะ ความปรารถนาที่ผิดกาลเทศะนำความเสียหาย", "ॐ कामदेवाय नमः", "โอม กามะเทวายะ นะมะห์"],
+    ["วัวกามเธนุ", "कामधेनु", "star", "deva", "สมหวังจากการให้", "ความสมหวัง · การให้ · ความอุดมสมบูรณ์", "วัวกามเธนุประทานทุกสิ่งที่ปรารถนาแก่ผู้ที่ดูแลด้วยความเคารพ สิ่งที่คุณหวังมีโอกาสเป็นจริงเมื่อคุณให้ด้วยใจที่ไม่หวังผล", "ทำบุญหรือช่วยเหลือผู้อื่นโดยไม่บอกใคร", "ในตำนาน ความโลภทำให้กามเธนุถูกแย่งชิง อย่าขอมากเกินที่ต้องการ", "ॐ कामधेनवे नमः", "โอม กามะเธนะเว นะมะห์"],
+    ["พระแม่ภูมิ (ภูเทวี)", "भूदेवी", "earth", "shakti", "ยืนบนพื้นดินให้มั่น", "ความมั่นคง · ความอดทน · บ้าน", "แผ่นดินรองรับทุกสิ่งโดยไม่บ่น พระแม่ภูมิเตือนให้กลับมาสู่สิ่งพื้นฐาน ที่อยู่ ร่างกาย และกิจวัตร ก่อนจะไปไกลกว่านี้", "จัดการเรื่องบ้าน ที่ดิน หรือเอกสารสำคัญที่ค้างไว้", "ความอดทนของแผ่นดินมีขีดจำกัด อย่าให้คนอื่นเหยียบย่ำคุณ", "ॐ भूम्यै नमः", "โอม ภูมไย นะมะห์"],
+    ["พระแม่ตุลสี", "तुलसी", "leaf", "vishnu", "ศรัทธาในชีวิตประจำวัน", "ความบริสุทธิ์ · ศรัทธา · กิจวัตร", "ต้นตุลสีปลูกไว้หน้าบ้านชาวฮินดูและได้รับการรดน้ำบูชาทุกวัน สิ่งศักดิ์สิทธิ์ไม่ได้อยู่ไกล แต่อยู่ในความตั้งใจเล็ก ๆ ที่ทำทุกวัน", "สร้างกิจวัตรดี ๆ หนึ่งอย่างที่ทำทุกเช้า", "พิธีกรรมที่ทำโดยไม่มีใจเป็นแค่ความเคยชิน", "ॐ तुलस्यै नमः", "โอม ตุลัสไย นะมะห์"],
+    ["พระแม่มาริอัมมัน", "மாரியம்மன்", "khadga", "shakti", "แม่ผู้คุ้มภัย", "การคุ้มครอง · การหายจากโรค · ศักติ", "พระแม่มาริอัมมันเป็นที่พึ่งของชาวทมิฬในยามโรคระบาดและภัยแล้ง ในไทยประดิษฐานที่วัดพระศรีมหาอุมาเทวี (วัดแขก สีลม) คุณได้รับการคุ้มครองมากกว่าที่รู้ตัว", "ดูแลสุขอนามัยและความสะอาดของบ้าน และขอบคุณผู้ที่คอยดูแลคุณ", "ความกลัวทำให้คนวิ่งหาที่พึ่งโดยไม่ไตร่ตรอง ระวังคนที่หากินกับความกลัว", "ஓம் சக்தி", "โอม ศักติ"],
+    ["กาลไภรวะ", "काल भैरव", "khadga", "shiva", "เผชิญความกลัว", "ความกล้า · เวลา · การพิทักษ์", "กาลไภรวะเป็นผู้พิทักษ์เมืองพาราณสีและผู้ควบคุมเวลา สิ่งที่คุณกลัวจะเล็กลงเมื่อหันไปเผชิญหน้ากับมัน", "ทำสิ่งที่ผัดผ่อนมาเพราะความกลัวหนึ่งอย่าง", "อย่าใช้ความน่ากลัวข่มคนอื่น", "ॐ कालभैरवाय नमः", "โอม กาละไภระวายะ นะมะห์"],
+    ["พระทัตตาเตรยะ", "दत्तात्रेय", "om", "sage", "เรียนรู้จากทุกสิ่ง", "การเรียนรู้ · ครู · ความถ่อมตน", "พระทัตตาเตรยะมีครูถึง 24 อย่าง ทั้งแผ่นดิน น้ำ ผึ้ง และงูเหลือม ทุกคนและทุกเหตุการณ์รอบตัวคุณตอนนี้กำลังสอนอะไรบางอย่าง", "ถามตัวเองว่าปัญหาหรือคนที่ทำให้หงุดหงิดกำลังสอนอะไรคุณ", "อย่าคิดว่าไม่มีอะไรต้องเรียนรู้อีกแล้ว", "ॐ दत्तात्रेयाय नमः", "โอม ทัตตาเตรยายะ นะมะห์"],
+    ["พระพฤหัสบดี", "बृहस्पति", "om", "graha", "คำแนะนำจากครู", "คำแนะนำ · โชคลาภ · ปัญญา", "พระพฤหัสบดีเป็นครูของเหล่าเทวดา และเป็นดาวแห่งความโชคดีในโหราศาสตร์ คำแนะนำจากผู้ใหญ่หรือผู้เชี่ยวชาญจะเปิดโอกาสให้คุณ", "ขอคำปรึกษาจากคนที่มีประสบการณ์มากกว่า และตั้งใจฟังจริง", "อย่าสอนคนอื่นในเรื่องที่ตัวเองยังไม่ได้ทำ", "ॐ बृहस्पतये नमः", "โอม พฤหัสปะตะเย นะมะห์"]
+  ];
+  const DECK = CARDS.map((c, i) => ({ id: i, th: c[0], deva: c[1], em: c[2], grp: c[3], theme: c[4], kw: c[5], msg: c[6], act: c[7], warn: c[8], mt: c[9], mtTh: c[10], ta: /[஀-௿]/.test(c[1]) }));
+
+  const GROUPS = {
+    shiva: ["สายพระศิวะ", "เรื่องนี้เกี่ยวกับการปล่อยวาง การเปลี่ยนผ่าน และการกลับเข้าหาตัวเอง"],
+    vishnu: ["สายพระวิษณุ", "เรื่องนี้เกี่ยวกับหน้าที่ การรักษาสิ่งดีไว้ และการได้รับความคุ้มครอง"],
+    shakti: ["พลังศักติ (เทวี)", "เรื่องนี้ต้องใช้ความกล้า การดูแล และพลังที่อ่อนโยนแต่เข้มแข็ง"],
+    graha: ["เทพนพเคราะห์", "จังหวะเวลามีผลมาก บางเรื่องต้องรอให้ถึงเวลา"],
+    deva: ["เทพแห่งธรรมชาติและอำนาจ", "เรื่องนี้เกี่ยวกับทรัพย์ อำนาจ ความตั้งใจ หรือปัจจัยภายนอกที่จับต้องได้"],
+    sage: ["ฤๅษีและครู", "คำตอบมาจากการเรียนรู้ การฟัง และการเปิดใจ"]
+  };
+
+  const SPREADS = {
+    1: [{ n: "สาส์นจากเทพ", d: "สิ่งที่เทพต้องการบอกคุณตอนนี้" }],
+    3: [{ n: "สิ่งที่เป็นอยู่", d: "สถานการณ์และพลังรอบตัวคุณตอนนี้" }, { n: "สิ่งที่ควรทำ", d: "คำแนะนำจากเทพสำหรับเรื่องนี้" }, { n: "สิ่งที่จะคลี่คลาย", d: "ทิศทางที่เรื่องจะไปเมื่อคุณทำตามคำแนะนำ" }],
+    5: [
+      { n: "ดิน (ปฤถวี)", d: "ร่างกาย เงิน บ้าน และสิ่งที่จับต้องได้" },
+      { n: "น้ำ (อาปะ)", d: "อารมณ์ ความรัก และความสัมพันธ์" },
+      { n: "ไฟ (อัคนี)", d: "การงาน ความตั้งใจ และแรงผลักดัน" },
+      { n: "ลม (วายุ)", d: "ความคิด การสื่อสาร และการตัดสินใจ" },
+      { n: "อากาศ (อากาศะ)", d: "จิตใจ ศรัทธา และสิ่งที่อยู่เหนือเหตุผล" }
+    ]
+  };
+  const SPREAD_NAME = { 1: "ไพ่ 1 ใบ สาส์นจากเทพ", 3: "ไพ่ 3 ใบ เป็นอยู่–ควรทำ–คลี่คลาย", 5: "ไพ่ 5 ใบ ปัญจภูต (ห้าธาตุ)" };
+  const MAX_CLAR = 2;
+
+  const S = (d) => `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const EMBLEM = {
+    lotus: S('<path d="M24 40c-6-5-7-13 0-25 7 12 6 20 0 25Z"/><path d="M24 40c-9 0-15-6-16-14 8 0 13 5 16 14Z"/><path d="M24 40c9 0 15-6 16-14-8 0-13 5-16 14Z"/><path d="M8 42h32"/>'),
+    trishula: S('<path d="M24 44V12"/><path d="M13 8c0 9 4 13 11 13s11-4 11-13"/><path d="M24 4v8"/><path d="M18 32h12"/>'),
+    chakra: S('<circle cx="24" cy="24" r="17"/><circle cx="24" cy="24" r="4"/><path d="M24 7v13M24 28v13M7 24h13M28 24h13M12 12l9 9M27 27l9 9M36 12l-9 9M21 27l-9 9"/>'),
+    flame: S('<path d="M24 44c-8 0-12-6-12-12 0-8 8-12 8-22 4 4 6 8 6 12 2-2 3-4 3-7 4 5 7 10 7 17 0 6-4 12-12 12Z"/><path d="M24 44c-3 0-5-2-5-5 0-4 5-6 5-10 3 3 5 6 5 10 0 3-2 5-5 5Z"/>'),
+    kalasha: S('<path d="M15 20h18"/><path d="M18 20c-6 4-8 10-6 15 2 5 7 7 12 7s10-2 12-7c2-5 0-11-6-15"/><path d="M24 20c-3-4-3-8 0-12 3 4 3 8 0 12Z"/><path d="M24 15c-4-3-8-3-11-1M24 15c4-3 8-3 11-1"/>'),
+    khadga: S('<path d="M24 4c3 6 4 14 2 28h-4c-2-14-1-22 2-28Z"/><path d="M15 32h18M24 32v9M21 44h6"/>'),
+    coin: S('<circle cx="24" cy="24" r="18"/><circle cx="24" cy="24" r="12"/><path d="M24 16c-3 3-3 6 0 8 3-2 3-5 0-8ZM16 26c3 0 6 1 8 4 2-3 5-4 8-4"/>'),
+    moon: S('<path d="M30 6a18 18 0 1 0 12 30A15 15 0 1 1 30 6Z"/>'),
+    sun: S('<circle cx="24" cy="24" r="9"/><path d="M24 4v6M24 38v6M4 24h6M38 24h6M10 10l4 4M34 34l4 4M38 10l-4 4M14 34l-4 4"/>'),
+    bow: S('<path d="M14 6c14 8 14 28 0 36"/><path d="M14 6v36"/><path d="M8 24h32M35 20l5 4-5 4"/>'),
+    gada: S('<circle cx="24" cy="14" r="9"/><path d="M24 23v21M20 44h8M17 10h14M17 18h14"/>'),
+    flute: S('<path d="M6 36 40 12"/><path d="M14 31l1 1M20 27l1 1M26 23l1 1M32 19l1 1"/><path d="M36 6c4 2 6 6 5 10-4-1-6-5-5-10Z"/>'),
+    damaru: S('<path d="M14 6h20L24 24Z"/><path d="M14 42h20L24 24Z"/><path d="M24 24c-6 2-10 6-12 10M24 24c6 2 10 6 12 10"/>'),
+    veena: S('<path d="M10 38 38 10"/><circle cx="10" cy="38" r="6"/><circle cx="36" cy="12" r="3"/><path d="M16 30l2 2M22 24l2 2M28 18l2 2"/>'),
+    vajra: S('<path d="M24 4v40"/><circle cx="24" cy="24" r="3"/><path d="M17 8c0 7 7 9 7 13 0-4 7-6 7-13M17 40c0-7 7-9 7-13 0 4 7 6 7 13"/>'),
+    pillar: S('<path d="M16 9h16v32H16Z"/><path d="M13 9h22M13 41h22"/><path d="M23 9l4 11-4 7 4 14"/>'),
+    wave: S('<path d="M4 18c6-6 10-6 16 0s10 6 16 0 8-4 8-4"/><path d="M4 28c6-6 10-6 16 0s10 6 16 0 8-4 8-4"/><path d="M4 38c6-6 10-6 16 0s10 6 16 0 8-4 8-4"/>'),
+    ring: S('<circle cx="24" cy="24" r="15"/><path d="M24 3v4M24 41v4M3 24h4M41 24h4M9 9l3 3M36 36l3 3M39 9l-3 3M12 36l-3 3"/><path d="M24 16v16M18 22l6-4 6 4M20 34l4-6 4 6"/>'),
+    vel: S('<path d="M24 44V22"/><path d="M24 4c7 6 7 13 0 18-7-5-7-12 0-18Z"/><path d="M19 26h10"/>'),
+    parashu: S('<path d="M16 44 30 8"/><path d="M27 13c9-1 14 5 12 13-7 0-12-5-12-13Z"/>'),
+    star: S('<path d="M24 4l4 14 14 6-14 6-4 14-4-14-14-6 14-6Z"/>'),
+    wind: S('<path d="M6 16h22a5 5 0 1 0-5-5"/><path d="M6 26h32a5 5 0 1 1-5 5"/><path d="M6 36h16"/>'),
+    wing: S('<path d="M6 32c10-2 18-10 22-22 2 8 0 14-4 18 6-2 12-2 18 2-8 2-14 6-18 12-4-6-10-9-18-10Z"/>'),
+    eclipse: S('<circle cx="21" cy="25" r="14"/><circle cx="28" cy="21" r="11" fill="currentColor" fill-opacity=".85"/>'),
+    earth: S('<path d="M4 38h40"/><path d="M8 38l10-16 6 8 6-12 10 20"/><circle cx="34" cy="12" r="4"/>'),
+    leaf: S('<path d="M24 44V20"/><path d="M24 22c-10-2-14-10-12-18 8 0 13 6 12 18Z"/><path d="M24 30c8-2 12-8 10-15-7 0-11 5-10 15Z"/>'),
+    half: S('<circle cx="24" cy="24" r="17"/><path d="M24 7v34"/><path d="M24 7a17 17 0 0 0 0 34Z" fill="currentColor" fill-opacity=".35"/>'),
+    om: '<span class="omg">ॐ</span>'
+  };
+
+  const $ = (s) => document.querySelector(s);
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const THAI_DIGIT = (n) => String(n).replace(/\d/g, (d) => "๐๑๒๓๔๕๖๗๘๙"[d]);
+
+  function randInt(n) {
+    const a = new Uint32Array(1);
+    const lim = Math.floor(0x100000000 / n) * n;
+    do { crypto.getRandomValues(a); } while (a[0] >= lim);
+    return a[0] % n;
+  }
+  function shuffled() {
+    const idx = DECK.map((_, i) => i);
+    for (let i = idx.length - 1; i > 0; i--) { const j = randInt(i + 1); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+    return idx;
+  }
+
+  let spreadN = store.get("oracle.spread", 3);
+  if (!SPREADS[spreadN]) spreadN = 3;
+  let state = null; // { t, n, q, order, next, cards: [{id, clar: [id]}], open: [bool] }
+
+  function faceHTML(c) {
+    return `<div class="face">
+      <span class="no">${THAI_DIGIT(c.id + 1)}</span>
+      <span class="emb">${EMBLEM[c.em] || EMBLEM.om}</span>
+      <span class="nm"><span class="deva${c.ta ? " ta" : ""}">${c.deva}</span><span class="thn">${esc(c.th)}</span><span class="theme">${esc(c.theme)}</span></span>
+    </div>`;
+  }
+
+  function syncButtons() {
+    document.querySelectorAll("#spreadSel button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.n === spreadN)));
+  }
+
+  function deal(animate) {
+    const order = shuffled();
+    const n = SPREADS[spreadN].length;
+    state = { t: Date.now(), n: spreadN, q: $("#q").value.trim(), order, next: n, cards: order.slice(0, n).map((id) => ({ id, clar: [] })), open: Array(n).fill(false) };
+    aiReset();
+    renderSpread(animate);
+    renderReading();
+  }
+
+  function renderSpread(animate) {
+    const el = $("#spread");
+    el.className = `spread s${state.n}`;
+    const pos = SPREADS[state.n];
+    el.innerHTML = state.cards.map((c, i) => {
+      const card = DECK[c.id];
+      const area = state.n === 5 ? `grid-area:p${i + 1};` : "";
+      const delay = animate ? `animation-delay:${i * 80}ms;` : "";
+      const label = state.open[i] ? `${pos[i].n}: ${card.th}` : `ตำแหน่ง ${i + 1} ${pos[i].n} แตะเพื่อเปิด`;
+      return `<div class="cell${animate ? " deal" : ""}" style="${area}${delay}">
+        <button type="button" class="slot${state.open[i] ? " open" : ""}" data-i="${i}" aria-label="${esc(label)}">
+          <div class="card"><div class="back"></div>${faceHTML(card)}</div>
+        </button>
+        <div class="pos"><b>${i + 1}</b> ${pos[i].n}${c.clar.length ? ` <span class="plus">+${c.clar.length}</span>` : ""}</div>
+      </div>`;
+    }).join("");
+    updateHint();
+  }
+
+  function updateHint() {
+    const left = state.open.filter((o) => !o).length;
+    $("#hint").textContent = left ? `ตั้งจิตถึงคำถาม แล้วแตะไพ่เพื่อเปิด · เหลือ ${left} ใบ` : "เปิดครบแล้ว อ่านสาส์นด้านล่าง";
+    $("#revealAll").disabled = !left;
+  }
+
+  function open(i) {
+    if (!state || state.open[i]) return;
+    state.open[i] = true;
+    const slot = document.querySelector(`.slot[data-i="${i}"]`);
+    slot.classList.add("open");
+    slot.setAttribute("aria-label", `${SPREADS[state.n][i].n}: ${DECK[state.cards[i].id].th}`);
+    updateHint();
+    renderReading();
+  }
+
+  function drawClar(i) {
+    if (!state || state.next >= DECK.length) return;
+    const c = state.cards[i];
+    if (c.clar.length >= MAX_CLAR) return;
+    c.clar.push(state.order[state.next++]);
+    renderSpread(false);
+    renderReading();
+    saveHistory();
+    const el = document.querySelector(`#e${i}`);
+    if (el) el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+  }
+
+  function entryHTML(i) {
+    const pos = SPREADS[state.n][i], c = state.cards[i], k = DECK[c.id];
+    const clar = c.clar.map((id) => {
+      const x = DECK[id];
+      return `<li><span class="cn">${esc(x.th)}</span> <span class="theme">${esc(x.theme)}</span><p>${esc(x.msg)}</p><p class="do"><b>ควรทำ:</b> ${esc(x.act)}</p></li>`;
+    }).join("");
+    return `<article class="entry" id="e${i}">
+      <div class="posn">${i + 1} · ${pos.n} — ${pos.d}</div>
+      <div class="top"><span class="cn">${esc(k.th)}</span><span class="dv${k.ta ? " ta" : ""}">${k.deva}</span></div>
+      <div class="theme">${esc(k.theme)}</div>
+      <div class="kw">${esc(k.kw)}</div>
+      <p>${esc(k.msg)}</p>
+      <p class="do"><b>ควรทำ:</b> ${esc(k.act)}</p>
+      <p class="warn"><b>ควรระวัง:</b> ${esc(k.warn)}</p>
+      <div class="mantra"><span class="m${k.ta ? " ta" : ""}">${k.mt}</span><span class="t">${esc(k.mtTh)}</span></div>
+      ${clar ? `<p class="note">สาส์นเพิ่มเติมสำหรับตำแหน่งนี้</p><ul class="clar">${clar}</ul>` : ""}
+      ${c.clar.length < MAX_CLAR && state.next < DECK.length ? `<div><button type="button" class="btn small ghost" data-clar="${i}">+ ขอสาส์นเพิ่ม (${c.clar.length}/${MAX_CLAR})</button></div>` : ""}
+    </article>`;
+  }
+
+  function summaryHTML() {
+    const cs = state.cards.map((c) => DECK[c.id]);
+    const lines = [];
+    const counts = {};
+    cs.forEach((c) => { counts[c.grp] = (counts[c.grp] || 0) + 1; });
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    if (cs.length === 1) {
+      lines.push(`สาส์นวันนี้มาจาก${GROUPS[cs[0].grp][0]}: ${GROUPS[cs[0].grp][1]}`);
+    } else if (top[0][1] >= 2) {
+      lines.push(`${GROUPS[top[0][0]][0]}ออก ${top[0][1]} ใบ: ${GROUPS[top[0][0]][1]}`);
+    } else {
+      lines.push("ไพ่มาจากหลายสายไม่ซ้ำกัน: เรื่องนี้มีหลายด้านที่ต้องดูแลพร้อมกัน ไม่มีด้านใดเด่นกว่า");
+    }
+    if (state.n === 3) {
+      const [a, b, c] = cs;
+      lines.push(`จาก "${a.theme}" เทพแนะนำให้ "${b.theme}" แล้วเรื่องจะคลี่คลายไปสู่ "${c.theme}"`);
+    }
+    if (state.n === 5) {
+      lines.push(`ห้าธาตุของคุณตอนนี้: ${state.cards.map((c, i) => `${SPREADS[5][i].n.split(" ")[0]} = ${DECK[c.id].theme}`).join(" · ")}`);
+    }
+    const acts = cs.map((c) => c.act);
+    return `<div class="summary"><h2>สาส์นโดยรวม</h2>${lines.map((l) => `<p>${esc(l)}</p>`).join("")}
+      <p><b>สิ่งที่ควรทำ</b></p><ul>${acts.map((a) => `<li>${esc(a)}</li>`).join("")}</ul></div>`;
+  }
+
+  function readingText() {
+    const pos = SPREADS[state.n];
+    const out = [state.q ? `คำถาม: ${state.q}` : "ไพ่ออราเคิลเทพฮินดู", SPREAD_NAME[state.n]];
+    state.cards.forEach((c, i) => {
+      const k = DECK[c.id];
+      out.push(`${i + 1}. ${pos[i].n}: ${k.th} — ${k.theme}\n   ${k.msg}\n   ควรทำ: ${k.act}\n   ${k.mt} (${k.mtTh})`);
+      c.clar.forEach((id) => out.push(`   + สาส์นเพิ่ม: ${DECK[id].th} — ${DECK[id].theme}`));
+    });
+    if (ai.text && ai.sig === sigOf()) out.push("\nการอ่านเชิงลึก:\n" + stripMeta(ai.text));
+    return out.join("\n");
+  }
+
+  function renderReading() {
+    const el = $("#reading");
+    if (!state) { el.innerHTML = ""; return; }
+    const opened = state.cards.map((_, i) => i).filter((i) => state.open[i]);
+    if (!opened.length) {
+      el.innerHTML = `<h2>สาส์นจากเทพ</h2><p class="note">สาส์นของแต่ละตำแหน่งจะขึ้นที่นี่เมื่อคุณเปิดไพ่</p>`;
+      renderAI();
+      return;
+    }
+    const allOpen = opened.length === state.cards.length;
+    el.innerHTML = `<h2>สาส์นจากเทพ${state.q ? ` · <span class="qline">${esc(state.q)}</span>` : ""}</h2>` +
+      opened.map(entryHTML).join("") +
+      (allOpen ? summaryHTML() + `<div class="actions"><button type="button" class="btn ghost" id="copy">คัดลอกสาส์น</button></div>` : "");
+    if (allOpen) saveHistory();
+    renderAI();
+  }
+
+  // ---------- อ่านเชิงลึกด้วย Claude (เฉพาะใน claude.ai) ----------
+  let sample = null;
+  const ai = { status: "idle", text: "", clarity: "", clarify: [], err: "", sig: "", ctl: null, off: false };
+  const sigOf = () => state ? JSON.stringify([state.q, state.cards.map((c) => [c.id, c.clar])]) : "";
+  function aiReset() {
+    if (ai.ctl) ai.ctl.abort();
+    Object.assign(ai, { status: "idle", text: "", clarity: "", clarify: [], err: "", sig: "", ctl: null });
+  }
+  const stripMeta = (t) => t.replace(/\n?[ \t]*\**CLARITY:[\s\S]*$/, "").replace(/\n\s*C(L(A(R(I(T(Y)?)?)?)?)?)?$/, "").trim();
+  function md(t) {
+    const inline = (s) => s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    let html = "", list = false, para = [];
+    const flush = () => { if (para.length) { html += `<p>${para.join("<br>")}</p>`; para = []; } };
+    const close = () => { if (list) { html += "</ul>"; list = false; } };
+    for (const raw of esc(t).split("\n")) {
+      const l = raw.trim();
+      let m;
+      if (!l) { flush(); close(); continue; }
+      if ((m = l.match(/^(#{1,4})\s+(.*)/))) { flush(); close(); const h = m[1].length <= 2 ? 3 : 4; html += `<h${h}>${inline(m[2])}</h${h}>`; continue; }
+      if ((m = l.match(/^(?:[-*•]|\d+[.)])\s+(.*)/))) { flush(); if (!list) { html += "<ul>"; list = true; } html += `<li>${inline(m[1])}</li>`; continue; }
+      close(); para.push(inline(l));
+    }
+    flush(); close();
+    return html;
+  }
+
+  function buildPrompt() {
+    const pos = SPREADS[state.n];
+    const line = (k) => `${k.th} (${k.deva}) — หัวข้อ "${k.theme}" — สาส์น: ${k.msg} — ควรทำ: ${k.act} — ควรระวัง: ${k.warn}`;
+    const cards = state.cards.map((c, i) => `${i + 1}. ตำแหน่ง "${pos[i].n}" (${pos[i].d}): ${line(DECK[c.id])}` +
+      c.clar.map((id, j) => `\n   สาส์นเพิ่มใบที่ ${j + 1}: ${line(DECK[id])}`).join("")).join("\n");
+    return `คุณเป็นผู้อ่านไพ่ออราเคิลที่รู้ตำนานฮินดูอย่างลึกซึ้งและให้ความเคารพต่อศาสนาฮินดู อ่านไพ่ชุดนี้เป็นภาษาไทยอย่างละเอียดและตรงกับคำถาม ไพ่ชุดนี้เป็นออราเคิลเทพฮินดู 44 ใบ ไม่ใช่ไพ่ทาโรต์ ห้ามนำความหมายไพ่ทาโรต์มาใช้ และไม่มีไพ่กลับหัว
+
+คำถาม: ${state.q || "(ไม่ได้ระบุ ให้อ่านเป็นสาส์นสำหรับชีวิตช่วงนี้)"}
+รูปแบบการเปิด: ${SPREAD_NAME[state.n]}
+ไพ่ที่เปิดได้:
+${cards}
+
+หลักการ:
+- ใช้สาส์นของแต่ละใบเป็นฐาน แล้วขยายด้วยตำนานของเทพองค์นั้น เชื่อมกับคำถามโดยตรง
+- อธิบายความเชื่อมโยงระหว่างไพ่แต่ละตำแหน่ง
+- พูดตรง ถ้ามีเรื่องที่ต้องระวังให้บอกชัด อย่าสัญญาผลลัพธ์ทางวัตถุ
+- เรื่องสุขภาพ กฎหมาย หรือการเงินที่เสี่ยง ให้ระบุว่าไพ่ไม่ใช่คำแนะนำทางวิชาชีพ
+- ห้ามแนะนำให้จ่ายเงินทำพิธีหรือซื้อวัตถุมงคล
+
+รูปแบบคำตอบ (Markdown ภาษาไทย):
+## สาส์นโดยสรุป
+## อ่านทีละใบ
+ใช้หัวข้อ ### ต่อหนึ่งตำแหน่ง
+## ความเชื่อมโยงของเทพในการเปิดครั้งนี้
+## สิ่งที่ควรทำ
+bullet 3–5 ข้อที่ทำได้จริง
+## สิ่งที่ควรระวัง
+
+บรรทัดสุดท้ายต้องอยู่ในรูปแบบนี้เท่านั้น:
+CLARITY: ชัดเจน หรือ กำกวม; CLARIFY: เลขตำแหน่งที่ควรขอสาส์นเพิ่มคั่นด้วยจุลภาค หรือ - ถ้าไม่จำเป็น`;
+  }
+
+  const AI_ERR = {
+    not_granted: "ยังไม่ได้อนุญาตให้หน้านี้ใช้ Claude",
+    sampling_disabled: "บัญชีนี้ใช้ Claude จากหน้านี้ไม่ได้",
+    rate_limited: "ใช้งานถี่เกินไปหรือถึงขีดจำกัดการใช้งาน ลองใหม่อีกสักครู่",
+    session_expired: "กรุณาเข้าสู่ระบบ claude.ai ใหม่",
+    refused: "Claude ไม่ตอบคำถามนี้ ลองปรับถ้อยคำของคำถาม",
+    empty_completion: "ไม่ได้รับคำตอบ ลองใหม่อีกครั้ง",
+    prompt_too_large: "ข้อมูลยาวเกินไป ลองลดจำนวนสาส์นเพิ่ม"
+  };
+  const AI_OFF = new Set(["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"]);
+
+  async function askAI() {
+    if (!sample || !state) return;
+    if (ai.ctl) ai.ctl.abort();
+    const ctl = new AbortController();
+    Object.assign(ai, { status: "thinking", text: "", clarity: "", clarify: [], err: "", sig: sigOf(), ctl });
+    renderAI();
+    try {
+      await sample(buildPrompt(), { signal: ctl.signal, onText: ({ text }) => { ai.text = text; ai.status = "streaming"; paintAI(); } });
+      const m = ai.text.match(/CLARITY:\s*([^;\n]+);\s*CLARIFY:\s*([^\n]*)/);
+      if (m) {
+        ai.clarity = m[1].replace(/\*/g, "").trim();
+        ai.clarify = [...new Set((m[2].match(/\d+/g) || []).map(Number).filter((x) => x >= 1 && x <= state.cards.length))];
+      }
+      ai.status = "done";
+    } catch (e) {
+      if (e && e.code === "cancelled") { ai.status = ai.text ? "done" : "idle"; ai.text = e.text || ai.text; }
+      else {
+        ai.text = e && e.code === "refused" ? "" : (e && e.text) || ai.text;
+        ai.err = (e && AI_ERR[e.code]) || "เชื่อมต่อไม่สำเร็จ ลองอีกครั้ง";
+        ai.status = "error";
+        if (e && AI_OFF.has(e.code)) ai.off = true;
+      }
+    }
+    if (ai.ctl === ctl) ai.ctl = null;
+    renderAI();
+  }
+  function paintAI() { const out = $("#aiOut"); if (!out) return renderAI(); out.innerHTML = md(stripMeta(ai.text)); }
+
+  function renderAI() {
+    const box = $("#ai");
+    if (!sample || !state || !state.open.every(Boolean)) { box.hidden = true; return; }
+    box.hidden = false;
+    const busy = ai.status === "thinking" || ai.status === "streaming";
+    const stale = ai.text && ai.sig !== sigOf();
+    const pos = SPREADS[state.n];
+    let html = `<h2>อ่านเชิงลึกตามคำถาม</h2>
+      <p class="note">Claude อ่านคำถาม ตำแหน่ง และสาส์นของเทพทุกใบ แล้วขยายด้วยตำนาน ใช้ปริมาณการใช้งาน Claude ของบัญชีที่เปิดหน้านี้ และใช้เวลาประมาณ 20–60 วินาที</p>`;
+    if (ai.off) html += `<p class="err">${ai.err}</p>`;
+    else {
+      html += `<div class="actions">${busy ? `<button type="button" class="btn ghost" id="aiStop">หยุด</button>`
+        : `<button type="button" class="btn" id="aiAsk">${ai.text ? (stale ? "อ่านใหม่ (รวมสาส์นเพิ่มล่าสุด)" : "อ่านใหม่อีกครั้ง") : "อ่านเชิงลึก"}</button>`}</div>`;
+      if (stale && !busy) html += `<p class="note">ไพ่หรือคำถามเปลี่ยนหลังการอ่านครั้งล่าสุด กด "อ่านใหม่" เพื่อรวมข้อมูลล่าสุด</p>`;
+      if (ai.status === "thinking") html += `<p class="thinking">กำลังอ่านสาส์น…</p>`;
+      if (ai.err) html += `<p class="err">${ai.err}</p>`;
+    }
+    html += `<div class="ai-out" id="aiOut">${ai.text ? md(stripMeta(ai.text)) : ""}</div>`;
+    if (ai.status === "done" && !stale && ai.clarity) {
+      const targets = ai.clarify.filter((p) => state.cards[p - 1].clar.length < MAX_CLAR);
+      html += `<div class="clarity"><p><b>Claude ประเมินว่า: ${esc(ai.clarity)}</b>${targets.length ? ` แนะนำขอสาส์นเพิ่มที่ตำแหน่ง ${targets.map((p) => `${p} ${pos[p - 1].n}`).join(", ")}` : ""}</p>
+        ${targets.length ? `<div class="actions">${targets.map((p) => `<button type="button" class="btn small" data-clar="${p - 1}">ขอสาส์นเพิ่มตำแหน่ง ${p}</button>`).join("")}</div>` : ""}</div>`;
+    }
+    box.innerHTML = html;
+  }
+
+  // ---------- คัดลอก / ประวัติ ----------
+  function copyReading() {
+    const text = readingText();
+    try { navigator.clipboard.writeText(text).then(() => toast("คัดลอกแล้ว"), () => fallbackCopy(text)); }
+    catch { fallbackCopy(text); }
+  }
+  function fallbackCopy(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand("copy"); } catch {}
+    ta.remove();
+    toast(ok ? "คัดลอกแล้ว" : "คัดลอกไม่ได้ในหน้านี้");
+  }
+  function toast(msg) {
+    const t = document.createElement("div");
+    t.className = "toast"; t.textContent = msg; document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1600);
+  }
+  function saveHistory() {
+    if (!state || !state.open.every(Boolean)) return;
+    const h = store.get("oracle.history", []).filter((r) => r.t !== state.t);
+    h.unshift({ t: state.t, q: state.q, n: state.n, c: state.cards.map((c) => [c.id, c.clar]) });
+    store.set("oracle.history", h.slice(0, 30));
+    renderHistory();
+  }
+  function renderHistory() {
+    const h = store.get("oracle.history", []);
+    const fmt = new Intl.DateTimeFormat("th-TH", { dateStyle: "medium", timeStyle: "short" });
+    const nm = (id) => DECK[id] ? esc(DECK[id].th) : "";
+    $("#hist").innerHTML = h.length ? h.map((r) => `<li>
+      <time>${fmt.format(new Date(r.t))} · ${r.n} ใบ</time>
+      ${r.q ? `<span>${esc(r.q)}</span>` : ""}
+      <span style="color:var(--muted)">${r.c.map(([id, cl]) => nm(id) + ((cl || []).length ? ` [+ ${cl.map(nm).join(", ")}]` : "")).join(" · ")}</span>
+    </li>`).join("") : `<li class="note">ยังไม่มีประวัติ</li>`;
+  }
+
+  // ---------- เหตุการณ์ ----------
+  $("#spreadSel").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    spreadN = +b.dataset.n; store.set("oracle.spread", spreadN); syncButtons(); deal(true);
+  });
+  $("#q").addEventListener("input", () => { if (state) state.q = $("#q").value.trim(); });
+  $("#q").addEventListener("change", () => renderReading());
+  $("#spread").addEventListener("click", (e) => { const s = e.target.closest(".slot"); if (s) open(+s.dataset.i); });
+  document.addEventListener("click", (e) => {
+    const c = e.target.closest("[data-clar]");
+    if (c) return drawClar(+c.dataset.clar);
+    if (e.target.closest("#copy")) return copyReading();
+    if (e.target.closest("#aiAsk")) return askAI();
+    if (e.target.closest("#aiStop")) { if (ai.ctl) ai.ctl.abort(); }
+  });
+  $("#shuffle").addEventListener("click", () => {
+    const deck = $("#deck");
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    $("#shuffle").disabled = true;
+    deck.classList.add("shuffling");
+    $("#hint").textContent = "กำลังสับไพ่ 44 ใบ…";
+    setTimeout(() => { deck.classList.remove("shuffling"); $("#shuffle").disabled = false; deal(true); }, reduce ? 0 : 800);
+  });
+  $("#revealAll").addEventListener("click", () => {
+    if (!state) return;
+    state.cards.forEach((_, i) => setTimeout(() => open(i), i * 120));
+  });
+
+  syncButtons();
+  renderHistory();
+  deal(false);
+
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("sample").then((s) => { sample = s; renderAI(); }, () => {});
+  }
+  if ("serviceWorker" in navigator && location.protocol === "https:" && !window.claude) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+})();
+</script>
+<!--ARTIFACT-END-->
+</body>
+</html>

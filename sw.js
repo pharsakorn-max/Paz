@@ -1,6 +1,6 @@
 // Offline cache: แอปทำงานได้โดยไม่มีอินเทอร์เน็ตหลังเปิดครั้งแรก (ฟอนต์จะ fallback เป็นฟอนต์ระบบถ้ายังไม่เคยโหลด)
-const CACHE = "tarot-v3";
-const ASSETS = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-512.png"];
+const CACHE = "tarot-v4";
+const ASSETS = ["./", "index.html", "manifest.webmanifest", "oracle.html", "oracle.webmanifest", "icon-180.png", "icon-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
